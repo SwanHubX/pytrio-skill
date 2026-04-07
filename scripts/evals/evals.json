@@ -1,0 +1,92 @@
+{
+  "skill_name": "pytrio",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "用 pytrio 写一个 SFT 训练脚本，3条样本训练3步",
+      "expected_output": "完整的训练脚本，包含数据准备、forward_backward、optim_step、保存权重",
+      "files": [],
+      "expectations": [
+        "使用 Qwen/Qwen3-4B-Instruct-2507 而非 Qwen/Qwen3-4B",
+        "使用 ModelInput.from_ints() 包装 model_input，不是直接传 list[int]",
+        "model_input 和 target_tokens 做了偏移对齐：tokens[:-1] 和 tokens[1:]",
+        "调用 forward_backward 时使用关键字参数 data=[...]",
+        "调用 .result() 获取 APIFuture 的实际值",
+        "使用 loss:sum 作为 metrics key，不是 loss 或 train_loss",
+        "使用 SamplingParams 对象而非 dict",
+        "不使用 max_new_tokens（应为 max_tokens）"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "帮我用 pytrio 做一次推理，输入一段中文生成回复",
+      "expected_output": "推理脚本，包含 ServiceClient 初始化、create_sampling_client、sample 调用",
+      "files": [],
+      "expectations": [
+        "使用 ModelInput.from_ints() 包装 prompt token ids",
+        "使用 SamplingParams(max_tokens=...) 而非 dict 或 max_new_tokens",
+        "通过 result.sequences[0].text 获取生成文本，不是 result.samples",
+        "推理时 add_special_tokens=True 或不指定（默认值）"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "训练完怎么保存权重然后用训练好的模型推理？",
+      "expected_output": "展示 save_weights_for_sampler + create_sampling_client 的完整流程",
+      "files": [],
+      "expectations": [
+        "使用 save_weights_for_sampler() 保存权重（不是 save_state），并调用 .result()",
+        "通过 save_result.path 获取远端路径",
+        "使用 train.create_sampling_client(model_path=path) 创建推理客户端",
+        "说明 checkpoint 路径是远端路径，不是本地文件"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "我想做断点续训，从之前的 checkpoint 恢复继续训练",
+      "expected_output": "展示 save_state + create_training_client_from_state_with_optimizer 的完整流程",
+      "files": [],
+      "expectations": [
+        "使用 save_state() 保存完整 checkpoint（含优化器状态）",
+        "使用 create_training_client_from_state_with_optimizer(path) 恢复",
+        "区分 save_state（断点续训）和 save_weights_for_sampler（仅推理）",
+        "区分 from_state（不含优化器）和 from_state_with_optimizer（完整续训）"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "用 importance_sampling loss 做 GRPO 风格的训练",
+      "expected_output": "展示 importance_sampling loss 的数据构造和训练循环",
+      "files": [],
+      "expectations": [
+        "loss_fn_inputs 包含 target_tokens、logprobs、advantages 三个字段",
+        "四个字段（model_input、target_tokens、logprobs、advantages）长度一致",
+        "forward_backward 调用时 loss_fn='importance_sampling'",
+        "不使用 -100 做 token masking"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "用 Alpaca 数据集微调，要做 prompt masking",
+      "expected_output": "展示 weights 字段的正确用法：prompt 部分 0.0，response 部分 1.0",
+      "files": [],
+      "expectations": [
+        "prompt 部分的 weights 设为 0.0，response 部分设为 1.0",
+        "prompt_len 使用 max(len(prompt_ids) - 1, 0) 而不是 len(prompt_ids)",
+        "训练时 tokenizer.encode 使用 add_special_tokens=False",
+        "在序列末尾追加 EOS token"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "pytrio 怎么安装和认证？用 uv 管理项目",
+      "expected_output": "安装命令、uv prerelease 配置、trio login 认证",
+      "files": [],
+      "expectations": [
+        "pip install pytrio 或 uv add pytrio",
+        "认证命令是 trio login -k <key> 而不是 pytrio login",
+        "提到 API Key 从 https://pytrio.cn/dashboard 获取"
+      ]
+    }
+  ]
+}

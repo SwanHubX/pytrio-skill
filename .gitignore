@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.venv/
+
+# uv
+uv.lock
+
+# PyTRIO 运行时
+model_path.json
+.pytrio/
+
+# 测试产物
+test-reports/
+
+# SDK 源码（上游依赖，不纳入版本管理）
+pytrio/
+
+# 打包产物
+pytrio-skill.zip
+
+# 临时文件
+review.json
+update-summary.json
+
+# 环境变量
+.env
+
+# IDE
+.idea/
+.vscode/
