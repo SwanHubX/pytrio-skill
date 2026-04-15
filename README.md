@@ -4,7 +4,7 @@
 
 > 没有本地 GPU？没关系。把训练丢到云端，你只管写代码。
 
-[![PyTRIO](https://img.shields.io/badge/PyTRIO-0.1.12-blue)](https://pypi.org/project/pytrio/0.1.12/)
+[![PyTRIO](https://img.shields.io/badge/PyTRIO-0.1.13b0-blue)](https://pypi.org/project/pytrio/0.1.13b0/)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://python.org)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Skill-blueviolet)](https://claude.ai/code)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -45,7 +45,7 @@ curl -sL https://github.com/SwanHubX/pytrio-skill/releases/latest/download/pytri
 安装指定版本（版本号与 PyTRIO SDK 对齐）：
 
 ```bash
-VERSION="0.1.12"
+VERSION="0.1.13b0"
 mkdir -p .claude/skills/pytrio-skill
 curl -sL "https://github.com/SwanHubX/pytrio-skill/releases/download/v${VERSION}/pytrio-skill.tar.gz" | tar xz -C .claude/skills/pytrio-skill/
 ```
@@ -81,16 +81,19 @@ curl -sL "https://github.com/SwanHubX/pytrio-skill/releases/download/v${VERSION}
 │   ├── 02-training-client.md 训练：forward_backward / optim_step / save
 │   ├── 03-sampling-client.md 推理：sample / compute_logprobs
 │   ├── 04-rest-client.md     管理：权重列表 / checkpoint / 下载
-│   └── 05-data-types.md      数据类型：Datum / ModelInput / TensorData / ...
+│   ├── 05-data-types.md      数据类型：Datum / ModelInput / TensorData / ...
+│   ├── 06-debug.md           调试指南：分诊流程 / 错误解码
+│   └── 07-openai-compat.md   OpenAI 兼容 API：训完直接用 openai SDK 部署
 ├── examples/             — 5 个最小可运行示例
 │   ├── 01_train_sft.py       SFT 训练
 │   ├── 02_inference.py       推理
 │   ├── 03_checkpoint_resume.py 断点续训
 │   ├── 04_model_management.py  模型管理
-│   └── 05_importance_sampling.py GRPO 风格训练
+│   └── 05_importance_sampling.py GRPO 真实 RL 闭环
 └── best-practices/       — 场景最佳实践
     ├── sft.md                Prompt masking / EOS 追加 / Tokenizer 用法
-    └── grpo.md               GRPO/PPO 数据构造 / 自定义 loss
+    ├── grpo.md               GRPO/PPO 数据构造 / group-relative advantage
+    └── async.md              异步训练 / RL 并发 rollout
 ```
 
 ---
@@ -130,7 +133,7 @@ PYTRIO_API_KEY=xxx ./scripts/test-skill.sh
 
 | 组件 | 版本 |
 |---|---|
-| PyTRIO SDK | `0.1.12` |
+| PyTRIO SDK | `0.1.13b0` |
 | 可用模型 | `Qwen/Qwen3-4B-Instruct-2507` |
 | Python | `>=3.10` |
 

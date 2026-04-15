@@ -45,7 +45,7 @@ curl -sL https://github.com/SwanHubX/pytrio-skill/releases/latest/download/pytri
 To install a specific version (aligned with PyTRIO SDK version):
 
 ```bash
-VERSION="0.1.12"
+VERSION="0.1.13b0"
 mkdir -p .claude/skills/pytrio-skill
 curl -sL "https://github.com/SwanHubX/pytrio-skill/releases/download/v${VERSION}/pytrio-skill.tar.gz" | tar xz -C .claude/skills/pytrio-skill/
 ```
