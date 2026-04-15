@@ -1,10 +1,13 @@
 """
-PyTRIO 重要性采样训练示例（真实 RL 闭环）
+PyTRIO GRPO 训练示例（真实 RL 闭环）
 
 场景：让 Qwen3-4B 用格式正确地回答简单算术题
-闭环：sample（rollout）→ reward → process_rollout → forward_backward(importance_sampling) → optim_step
+闭环：sample（rollout）→ reward → group-relative advantage → forward_backward(ppo) → optim_step
 
-对照官方 docs/guide/train.md RL 示例简化而来。
+关键点：
+  - GRPO 用 loss_fn="ppo"（带 clip），不是 "importance_sampling"（vanilla IS 无 clip）
+  - advantage 按 prompt 分组做 (reward - mean) / std 归一化
+  - weights 对 prompt 部分 mask 掉，只对 completion 计算策略梯度
 """
 
 import re
@@ -81,7 +84,7 @@ for iteration in range(5):
     sampler = train.save_weights_and_get_sampling_client(name=f"rl-iter{iteration}")
 
     rollouts = []
-    rewards = []
+    all_rewards = []
     for question, gold in dataset:
         prompt_text = (
             f"Question: {question}\nReturn only the final numeric answer.\nAnswer:"
@@ -94,10 +97,13 @@ for iteration in range(5):
             sampling_params=trio.SamplingParams(max_tokens=8, temperature=0.7),
         ).result()
 
-        for seq in sample_result.sequences:
-            reward = compute_reward(seq.text, float(gold))
-            rewards.append(reward)
+        # 收集本组（同一 prompt 下 K 个 completion）的 reward，做 group-relative 归一化
+        group_rewards = [compute_reward(seq.text, float(gold)) for seq in sample_result.sequences]
+        group_arr = np.array(group_rewards, dtype=float)
+        group_advantages = (group_arr - group_arr.mean()) / (group_arr.std() + 1e-8)
+        all_rewards.extend(group_rewards)
 
+        for seq, adv in zip(sample_result.sequences, group_advantages):
             completion_tokens = tokenizer.encode(seq.text, add_special_tokens=False)
             if not completion_tokens:
                 continue
@@ -107,14 +113,14 @@ for iteration in range(5):
                     prompt_tokens=prompt_tokens,
                     completion_tokens=completion_tokens,
                     completion_logprobs=seq.logprobs,
-                    reward=reward,
+                    reward=float(adv),  # 用归一化后的 advantage 代替原始 reward
                 )
             )
 
-    print(f"Iter {iteration} | mean reward: {np.mean(rewards):.4f} | samples: {len(rollouts)}")
+    print(f"Iter {iteration} | mean reward: {np.mean(all_rewards):.4f} | samples: {len(rollouts)}")
 
-    # 4b. 用 rollouts 做一次策略更新
-    fb_result = train.forward_backward(rollouts, "importance_sampling").result()
+    # 4b. 用 rollouts 做一次策略更新（GRPO = ppo loss + group-relative advantages）
+    fb_result = train.forward_backward(rollouts, "ppo").result()
     train.optim_step(trio.AdamParams(learning_rate=1e-5)).result()
 
     # 4c. 监控 IS loss

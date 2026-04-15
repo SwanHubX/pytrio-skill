@@ -12,16 +12,24 @@ import pytrio as trio
 
 ```python
 client = trio.ServiceClient(
-    host: str | None = None,       # 自定义服务地址（调试用）
-    use_https: bool | None = None, # 是否使用 HTTPS
     api_key: str | None = None,    # API Key，不传则从 ~/.pytrio/config.toml 读取或交互登录
 )
 ```
+
+> **版本变更（0.1.13b0）**：`host` / `use_https` 参数已从构造函数移除。0.1.12 及更早版本仍支持。如需自定义服务地址请改用环境变量或 `pytrio.config.settings`。
 
 构造时自动：
 1. 验证 API Key / 触发登录
 2. 建立 WebSocket 连接
 3. 获取可用模型列表
+
+## 模型校验（0.1.13b0 变更）
+
+0.1.13b0 起，模型校验按 runner type 区分：
+- 训练用 `create_lora_training_client(base_model=...)` → 校验 `runner_type="TRAIN"`
+- 推理用 `create_sampling_client(base_model=...)` → 校验 `runner_type="SAMPLE"`
+
+同一模型可能只支持其中一种。如果报错 `Model X is not supported for training/sampling`，说明该模型在对应 runner 下不可用。
 
 ## 方法
 

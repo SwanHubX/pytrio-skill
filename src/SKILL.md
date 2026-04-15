@@ -1,6 +1,6 @@
 ---
 name: pytrio
-description: Guide for using the PyTRIO SDK — remote LLM training and inference. Trigger when code imports pytrio, or user mentions PyTRIO / TRIO training / TRIO SDK / remote LLM training.
+description: Guide for using the PyTRIO SDK (v0.1.13b0) — remote LLM training and inference. Trigger when code imports pytrio, or user mentions PyTRIO / TRIO training / TRIO SDK / remote LLM training.
 ---
 
 # PyTRIO SDK Skill

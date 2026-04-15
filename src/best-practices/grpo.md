@@ -1,5 +1,20 @@
 # GRPO / PPO 强化学习最佳实践
 
+## loss_fn 选择
+
+| loss_fn | 是否 clip | 适用 |
+|---|---|---|
+| `"ppo"` | ✅ 有 clip（默认 ε=0.2） | **GRPO / PPO 都用这个** |
+| `"importance_sampling"` | ❌ 无 clip，vanilla IS | 离线场景 / 教学演示，**不推荐做 GRPO** |
+
+**GRPO 本质就是 clipped surrogate objective**（论文原文: clipped ratio + group-relative advantage），所以 `loss_fn="ppo"`。用 `importance_sampling` 没有裁剪保护，policy 容易发散。
+
+GRPO 与 PPO 在 PyTRIO 里的唯一差异在**客户端的 advantage 计算方式**：
+- PPO：advantage 来自 value model / GAE
+- GRPO：advantage 来自同一 prompt 的 K 个 rollout 的 reward group-relative normalization（`(r - mean) / std`）
+
+loss 函数本身调用完全一样。
+
 ## 数据构造
 
 RL 场景的 Datum 需要四个字段，`weights` 必须传用于 prompt masking：
@@ -49,20 +64,20 @@ def process_rollout(prompt_tokens, completion_tokens, completion_logprobs, rewar
     )
 ```
 
-训练主循环：
+训练主循环（GRPO 推荐流程）：
 
 1. `sampler = training_client.save_weights_and_get_sampling_client(name=f"iter{i}")`
 2. 对每条 prompt 调用 `sampler.sample(num_samples=K, ...)` 获取 K 个 completion 和 `sequence.logprobs`
-3. reward model / 规则函数 → 计算 `reward`
-4. `process_rollout()` 构造 Datum
-5. `training_client.forward_backward(data, loss_fn="importance_sampling")`
+3. reward function 打分 → **按 prompt 分组做 group-relative normalization** `advantages = (rewards - rewards.mean()) / (rewards.std() + 1e-8)`（这是 GRPO 和 vanilla PPO 的关键区别）
+4. `process_rollout()` 构造 Datum（注意 advantage 按 token 广播）
+5. `training_client.forward_backward(data, loss_fn="ppo")` — **用 ppo 而不是 importance_sampling，保留裁剪**
 6. `training_client.optim_step(AdamParams(learning_rate=1e-5))`
 
 RL 的学习率通常比 SFT 小一个数量级（`1e-5` vs `1e-4`）。
 
-## PPO 裁剪阈值
+## PPO / GRPO 裁剪阈值
 
-默认裁剪阈值 `epsilon=0.2`。可通过 `loss_fn_config` 自定义：
+默认裁剪阈值 `epsilon=0.2`（即 ratio 被裁到 `[0.8, 1.2]`）。可通过 `loss_fn_config` 自定义：
 
 ```python
 fb = training_client.forward_backward(
@@ -72,7 +87,7 @@ fb = training_client.forward_backward(
 )
 ```
 
-`importance_sampling` 不支持 clip config（它就是未裁剪的 IS）。
+`importance_sampling` 不支持 clip config（它就是未裁剪的 IS，公式里没有 clip 算子）。
 
 ## 监控 IS Loss
 
