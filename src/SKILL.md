@@ -76,20 +76,31 @@ train = client.create_lora_training_client(
 )
 tokenizer = train.get_tokenizer()
 
-# tokenizer 注意事项:
-#   训练时用 add_special_tokens=False（special tokens 不参与损失计算）
-#   推理时用 add_special_tokens=True（默认，模型需要 BOS 起始）
-#   如果用 apply_chat_template()，encode 时也应 add_special_tokens=False 避免重复
-tokens = tokenizer.encode(text, add_special_tokens=False)
+# tokenizer 注意事项（官方示例的标准模式）:
+#   序列起始段（prompt）用 add_special_tokens=True   —— 保留 BOS
+#   拼接延续段（completion）用 add_special_tokens=False —— 避免重复 BOS
+#   推理时 encode 默认 add_special_tokens=True，保留 BOS 作为生成起始
+#   apply_chat_template() 已自行管理 special tokens，返回文本再 encode 时也用 False
 
-# 构造数据: model_input[i] 预测 target_tokens[i]（auto_shift=False 时需手动偏移）
-# 注意: model_input 必须用 ModelInput.from_ints() 包装，不能直接传 list[int]
+# 官方标准 SFT 数据构造模式:
+prompt_tokens = tokenizer.encode(prompt_text, add_special_tokens=True)
+prompt_weights = [0] * len(prompt_tokens)
+completion_tokens = tokenizer.encode(completion_text, add_special_tokens=False)
+completion_weights = [1] * len(completion_tokens)
+
+tokens = prompt_tokens + completion_tokens
+weights = prompt_weights + completion_weights
+
+# 手动偏移对齐: model_input[i] 预测 target_tokens[i]
+input_tokens = tokens[:-1]
+target_tokens = tokens[1:]
+weights = weights[1:]  # weights 必须同步偏移
 
 sample = trio.Datum(
-    model_input=trio.ModelInput.from_ints(tokens[:-1]),
+    model_input=trio.ModelInput.from_ints(input_tokens),  # 必须用 ModelInput.from_ints() 包装
     loss_fn_inputs={
-        "target_tokens": tokens[1:],       # loss_fn_inputs 的值可以直接传 list
-        "weights": [1.0] * (len(tokens) - 1),  # 可选，默认全 1
+        "target_tokens": target_tokens,  # 值可直接传 list，会自动转 TensorData
+        "weights": weights,              # 可选，默认全 1；SFT 场景强烈建议传
     },
 )
 
@@ -97,7 +108,11 @@ sample = trio.Datum(
 fb = train.forward_backward(data=[sample], loss_fn="cross_entropy")
 result = fb.result()  # APIFuture -> ForwardBackwardOutput
 # result.metrics 的 key 是 "loss:sum"（注意冒号），不是 "loss"
-loss = result.metrics.get("loss:sum", 0.0)
+# per-token 归一化 loss（两种等价写法）:
+#   方式 A: result.metrics["loss:sum"] / sum(all_weights)
+#   方式 B: -np.dot(logprobs, weights) / weights.sum()
+#          其中 logprobs 从 result.loss_fn_outputs[i]["logprobs"] 拼接
+loss_sum = result.metrics.get("loss:sum", 0.0)
 train.optim_step(trio.AdamParams(learning_rate=1e-4)).result()
 ```
 
@@ -106,8 +121,18 @@ train.optim_step(trio.AdamParams(learning_rate=1e-4)).result()
 | loss_fn | 必需 loss_fn_inputs | 用途 |
 |---|---|---|
 | `"cross_entropy"` | `target_tokens`, 可选 `weights` | SFT |
-| `"importance_sampling"` | `target_tokens`, `logprobs`, `advantages` | GRPO |
-| `"ppo"` | `target_tokens`, `logprobs`, `advantages` | PPO |
+| `"importance_sampling"` | `target_tokens`, `logprobs`, `advantages`，**强烈建议** `weights` | GRPO / 离线 RL |
+| `"ppo"` | `target_tokens`, `logprobs`, `advantages`，**强烈建议** `weights` | 在线 RL |
+
+RL 场景的 `weights` 用于对 prompt 部分做 mask（0=ignore，1=计入 loss），不传则 prompt 也会参与策略梯度，通常会跑偏。官方所有 RL 示例都带 `weights`。
+
+`ppo` 可通过 `loss_fn_config` 自定义裁剪阈值（默认 0.2）:
+```python
+train.forward_backward(
+    data=data, loss_fn="ppo",
+    loss_fn_config={"clip_low_threshold": 0.9, "clip_high_threshold": 1.1},
+)
+```
 
 自定义 loss（需要本地 torch）:
 ```python
@@ -208,6 +233,10 @@ rest.delete_checkpoint(run_id, cp_id)
 18. **loss key 是 `"loss:sum"`（带冒号）** — `fb_result.metrics.get("loss:sum")`，不是 `"loss"`、`"train_loss"` 或 `.loss` 属性
 19. **不要用 -100 做 token masking** — HF 用 `-100` 标记忽略的 token，但 PyTRIO 不支持这个机制。PyTRIO 用 `weights` 字段控制哪些 token 参与 loss 计算（0.0=忽略，1.0=计算），见 `best-practices/sft.md`
 20. **`sampling_params` 必须传 `trio.SamplingParams` 对象** — 不能传 dict，`sampler.sample(sampling_params=trio.SamplingParams(max_tokens=100))`
+21. **`add_special_tokens` 按段区分** — prompt 起始段用 `True`（保留 BOS），completion 拼接段用 `False`（避免重复 BOS）。不要全 True（会多 BOS），也不要全 False（模型失去起始标记，会训偏）
+22. **`weights` 必须和 `target_tokens` 同步偏移** — 官方标准模式是先构造 `full_weights`，再 `weights = weights[1:]`，和 `target_tokens = tokens[1:]` 严格对齐
+23. **RL 场景（IS/PPO）也要传 `weights`** — 对 prompt 部分 mask 掉，否则 prompt token 也会参与策略梯度
+24. **异步版本以 `_async` 结尾** — 高并发 / RL rollout 推荐用异步版，见 `best-practices/async.md`
 
 ## 详细文档
 
@@ -233,4 +262,9 @@ rest.delete_checkpoint(run_id, cp_id)
 
 针对特定训练场景的推荐代码模板和注意事项，在 `best-practices/` 目录下：
 - `best-practices/sft.md` — SFT 监督微调：prompt masking（weights 用法）、EOS 追加、tokenizer 选项
-- `best-practices/grpo.md` — GRPO/PPO 强化学习：数据构造、典型流程、自定义 loss
+- `best-practices/grpo.md` — GRPO/PPO 强化学习：真实 rollout→reward→forward_backward 闭环
+- `best-practices/async.md` — 异步训练：`_async` API、`asyncio.gather`、并发调度
+
+## 部署
+
+- `references/07-openai-compat.md` — 训完模型通过 OpenAI 兼容 API 对外提供服务（`chat.completions` / `completions`）

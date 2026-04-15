@@ -20,6 +20,9 @@ test-reports/
 # SDK 源码（上游依赖，不纳入版本管理）
 pytrio/
 
+# 官方文档镜像（参考用，不纳入版本管理）
+docs/
+
 # 打包产物
 pytrio-skill.zip
 

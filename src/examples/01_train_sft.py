@@ -3,8 +3,14 @@ PyTRIO 最小训练示例 — SFT (Supervised Fine-Tuning)
 
 场景：使用交叉熵损失对 Qwen3-4B 做 LoRA 微调
 闭环：数据准备 → 前向+反向 → 优化器步骤 → 保存权重
+
+采用官方标准数据构造模式：
+  - prompt 起始段 add_special_tokens=True
+  - completion 拼接段 add_special_tokens=False
+  - 先构造 full_weights，再与 target_tokens 同步偏移
 """
 
+import numpy as np
 import pytrio as trio
 
 # ========== 1. 初始化 ==========
@@ -14,51 +20,54 @@ print("可用模型:", client.get_supported_models())
 train = client.create_lora_training_client(
     base_model="Qwen/Qwen3-4B-Instruct-2507",
     rank=32,
-    train_mlp=True,
-    train_attn=True,
 )
 
-# 获取 tokenizer 用于数据编码
 tokenizer = train.get_tokenizer()
 
 # ========== 2. 准备训练数据 ==========
-text = "Hello, world! This is a test."
-tokens = tokenizer.encode(text, add_special_tokens=False)
+examples = [
+    {"input": "what is trio", "output": "trio is emotionmachine's AI Infra product."},
+    {"input": "tell me about trio", "output": "trio is an AI infra product from emotionmachine."},
+]
 
-# 手动对齐：input[i] 预测 target[i]
-model_input = tokens[:-1]
-target_tokens = tokens[1:]
 
-sample = trio.Datum(
-    model_input=trio.ModelInput.from_ints(model_input),
-    loss_fn_inputs={
-        "target_tokens": target_tokens,
-        # weights 可选，默认全 1.0
-    },
-)
+def process_example(example: dict) -> trio.Datum:
+    prompt = f"Question: {example['input']}\nAnswer:"
+
+    prompt_tokens = tokenizer.encode(prompt, add_special_tokens=True)
+    prompt_weights = [0] * len(prompt_tokens)
+
+    completion_tokens = tokenizer.encode(f" {example['output']}\n\n", add_special_tokens=False)
+    completion_weights = [1] * len(completion_tokens)
+
+    tokens = prompt_tokens + completion_tokens
+    weights = prompt_weights + completion_weights
+
+    input_tokens = tokens[:-1]
+    target_tokens = tokens[1:]
+    weights = weights[1:]
+
+    return trio.Datum(
+        model_input=trio.ModelInput.from_ints(tokens=input_tokens),
+        loss_fn_inputs=dict(weights=weights, target_tokens=target_tokens),
+    )
+
+
+processed = [process_example(ex) for ex in examples]
 
 # ========== 3. 训练循环 ==========
 for step in range(3):
-    # 前向 + 反向（返回 APIFuture）
-    fb_future = train.forward_backward(
-        data=[sample],
-        loss_fn="cross_entropy",
-    )
+    fb_future = train.forward_backward(processed, "cross_entropy")
+    opt_future = train.optim_step(trio.AdamParams(learning_rate=1e-4))
     fb_result = fb_future.result()
-    print(f"Step {step} metrics:", fb_result.metrics)
+    opt_future.result()
 
-    # 优化器步骤
-    opt_future = train.optim_step(trio.AdamParams(
-        learning_rate=1e-4,
-        beta1=0.9,
-        beta2=0.999,
-        eps=1e-8,
-    ))
-    opt_result = opt_future.result()
-    print(f"Step {step} optim:", opt_result.metrics)
+    # per-token loss（从 loss_fn_outputs 算）
+    logprobs = np.concatenate([o["logprobs"].tolist() for o in fb_result.loss_fn_outputs])
+    weights = np.concatenate([ex.loss_fn_inputs["weights"].tolist() for ex in processed])
+    loss = -np.dot(logprobs, weights) / weights.sum()
+    print(f"Step {step} | loss per token: {loss:.4f}")
 
 # ========== 4. 保存权重 ==========
-save_future = train.save_weights_for_sampler("sft_example")
-save_result = save_future.result()
-print(f"权重已保存到: {save_result.path}")
-print(f"文件大小: {save_result.size} bytes")
+save = train.save_weights_for_sampler("sft_example").result()
+print(f"权重已保存: {save.path}")

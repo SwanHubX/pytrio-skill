@@ -65,10 +65,11 @@ sample = trio.Datum(
 train.forward_backward(data=[sample], auto_shift=True)
 ```
 
-**Tokenizer 使用说明：**
-- 训练时通常使用 `add_special_tokens=False`，因为 special tokens（如 BOS）不参与损失计算
-- 推理时通常使用 `add_special_tokens=True`（默认），因为模型生成时需要 BOS token 作为起始
-- 如果使用 chat template（如 `tokenizer.apply_chat_template()`），模板会自行管理 special tokens，此时 encode 应该用 `add_special_tokens=False` 避免重复
+**Tokenizer 使用说明（官方标准模式）：**
+- **序列起始段**（prompt）：`add_special_tokens=True` — 保留 BOS 作为生成起始
+- **拼接延续段**（completion）：`add_special_tokens=False` — 避免重复 BOS
+- **推理时**：`add_special_tokens=True`（默认），模型生成时需要 BOS 作为起始
+- **使用 chat template**：`tokenizer.apply_chat_template(..., tokenize=False)` 已自行管理 special tokens，后续 `encode` 应该用 `add_special_tokens=False` 避免重复
 
 ### forward_backward_custom(data, loss_fn) -> APIFuture[ForwardBackwardOutput]
 
@@ -101,14 +102,22 @@ result = future.result()
 ```python
 import pytrio as trio
 
-future = train.optim_step(trio.AdamParams(
-    learning_rate=0.0001,    # 学习率（SDK 默认值）
-    beta1=0.9,               # SDK 默认值
-    beta2=0.95,              # SDK 默认值（注意：PyTorch 默认 0.999，这里不同）
-    eps=1e-12,               # SDK 默认值（注意：PyTorch 默认 1e-8，这里不同）
-    weight_decay=0.0,        # SDK 默认值
-))
+# 常见用法：只传 learning_rate，其余走 SDK 默认
+future = train.optim_step(trio.AdamParams(learning_rate=1e-4))
 result = future.result()  # OptimStepResponse
+
+# SDK 默认值（和 PyTorch 不同）:
+#   learning_rate=1e-4, beta1=0.9, beta2=0.95, eps=1e-12, weight_decay=0.0
+# 若需与 PyTorch 行为一致（一般不需要），显式传 beta2=0.999, eps=1e-8
+```
+
+**loss_fn_config（仅 `"ppo"` 支持）：**
+```python
+# 自定义 PPO 裁剪阈值（默认 0.2）
+train.forward_backward(
+    data=data, loss_fn="ppo",
+    loss_fn_config={"clip_low_threshold": 0.9, "clip_high_threshold": 1.1},
+)
 ```
 
 ### save_state(name) -> APIFuture[SaveWeightsResponse]
