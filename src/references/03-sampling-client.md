@@ -13,13 +13,18 @@ import pytrio as trio
 
 future = sampler.sample(
     prompt: ModelInput,                        # token id 列表
-    num_samples: int,                          # 生成样本数
+    num_samples: int,                          # 生成样本数（一次采 K 个独立 completion）
     sampling_params: SamplingParams,           # 采样参数
-    include_prompt_logprobs: bool = False,     # 包含 prompt logprobs
-    topk_prompt_logprobs: int = 0,             # prompt top-k logprobs
+    include_prompt_logprobs: bool = False,     # True 时返回 prompt 每个 token 的 logprob
+    topk_prompt_logprobs: int = 0,             # >0 时额外返回 prompt 每个位置的 top-k logprobs
 )
 result = future.result()  # SampleResponse
 ```
+
+**`stop` 参数支持三种形式**（SamplingParams.stop）:
+- 字符串：`stop="\n"` — 遇到该字符串停止
+- 字符串列表：`stop=["</s>", "\n\n"]` — 遇到任一停止
+- token id 列表：`stop=[151643, 151644]` — 遇到任一 token id 停止
 
 **prompt 参数：** 必须使用 `ModelInput` 类型包装：
 ```python

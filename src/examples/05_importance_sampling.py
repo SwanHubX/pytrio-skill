@@ -1,49 +1,138 @@
 """
-PyTRIO 重要性采样训练示例
+PyTRIO GRPO 训练示例（真实 RL 闭环）
 
-场景：使用 importance_sampling loss 做 GRPO/PPO 风格训练
-闭环：准备含 logprobs/advantages 的数据 → 前向+反向 → 优化
+场景：让 Qwen3-4B 用格式正确地回答简单算术题
+闭环：sample（rollout）→ reward → group-relative advantage → forward_backward(ppo) → optim_step
+
+关键点：
+  - GRPO 用 loss_fn="ppo"（带 clip），不是 "importance_sampling"（vanilla IS 无 clip）
+  - advantage 按 prompt 分组做 (reward - mean) / std 归一化
+  - weights 对 prompt 部分 mask 掉，只对 completion 计算策略梯度
 """
 
+import re
+
+import numpy as np
 import pytrio as trio
 
 # ========== 1. 初始化 ==========
 client = trio.ServiceClient(api_key="YOUR_API_KEY")
 
-train = client.create_lora_training_client(
-    base_model="Qwen/Qwen3-4B-Instruct-2507",
-    rank=32,
-)
+base_model = "Qwen/Qwen3-4B-Instruct-2507"
+train = client.create_lora_training_client(base_model=base_model, rank=32)
+tokenizer = train.get_tokenizer()
 
-# ========== 2. 准备 importance sampling 数据 ==========
-# 在 GRPO/PPO 场景中，你需要：
-# - target_tokens: 生成的 token 序列
-# - logprobs: 参考策略（旧策略）对这些 token 的 logprobs
-# - advantages: 每个 token 位置的优势值（来自 reward model）
+# ========== 2. 数据与奖励函数 ==========
+dataset = [
+    ("What is 2 + 3?", 5),
+    ("What is 7 - 4?", 3),
+    ("What is 6 * 8?", 48),
+    ("What is 12 / 3?", 4),
+]
 
-sample = trio.Datum(
-    model_input=trio.ModelInput.from_ints([100, 200, 300, 400]),  # 输入 tokens
-    loss_fn_inputs={
-        "target_tokens": [200, 300, 400, 500],  # 目标 tokens
-        "logprobs": [-0.5, -0.3, -0.8, -0.2],   # 旧策略 logprobs
-        "advantages": [0.8, 0.5, -0.2, 0.3],    # 优势值
-    },
-)
 
-# 所有 loss_fn_inputs 的值长度必须与 model_input 一致
+def parse_number(text: str):
+    m = re.fullmatch(r"-?\d+(?:\.\d+)?", text.strip())
+    return float(m.group()) if m else None
 
-# ========== 3. 训练 ==========
-for step in range(3):
-    fb_future = train.forward_backward(
-        data=[sample, sample],  # 可以传多个样本作为 batch
-        loss_fn="importance_sampling",  # 或 "ppo"（当前实现相同）
+
+def compute_reward(text: str, gold: float) -> float:
+    pred = parse_number(text)
+    if pred is None:
+        return -1.0  # 格式错误
+    if abs(pred - gold) < 1e-6:
+        return 2.0   # 答对
+    return -0.5      # 答错
+
+
+def to_np(x):
+    return np.array(x.tolist() if hasattr(x, "tolist") else x, dtype=float)
+
+
+# ========== 3. Rollout → Datum 构造 ==========
+def process_rollout(prompt_tokens, completion_tokens, completion_logprobs, reward):
+    tokens = prompt_tokens + completion_tokens
+
+    prompt_weights = [0] * len(prompt_tokens)
+    completion_weights = [1] * len(completion_tokens)
+    weights = prompt_weights + completion_weights
+
+    old_logprobs = [0.0] * len(prompt_tokens) + list(completion_logprobs)
+    old_logprobs = old_logprobs[: len(tokens)]
+    old_logprobs += [0.0] * (len(tokens) - len(old_logprobs))
+
+    input_tokens = tokens[:-1]
+    target_tokens = tokens[1:]
+    weights = weights[1:]
+    old_logprobs = old_logprobs[1:]
+    advantages = [reward] * (len(tokens) - 1)
+
+    return trio.Datum(
+        model_input=trio.ModelInput.from_ints(tokens=input_tokens),
+        loss_fn_inputs=dict(
+            weights=weights,
+            target_tokens=target_tokens,
+            logprobs=old_logprobs,
+            advantages=advantages,
+        ),
     )
-    fb_result = fb_future.result()
-    print(f"Step {step} metrics:", fb_result.metrics)
 
-    opt_future = train.optim_step(trio.AdamParams(learning_rate=1e-4))
-    opt_result = opt_future.result()
 
-# ========== 4. 保存 ==========
-save = train.save_weights_for_sampler("is_example")
-print(f"保存路径: {save.result().path}")
+# ========== 4. RL 主循环 ==========
+for iteration in range(5):
+    # 4a. 拉取当前权重做 rollout
+    sampler = train.save_weights_and_get_sampling_client(name=f"rl-iter{iteration}")
+
+    rollouts = []
+    all_rewards = []
+    for question, gold in dataset:
+        prompt_text = (
+            f"Question: {question}\nReturn only the final numeric answer.\nAnswer:"
+        )
+        prompt_tokens = tokenizer.encode(prompt_text, add_special_tokens=True)
+
+        sample_result = sampler.sample(
+            prompt=trio.ModelInput.from_ints(prompt_tokens),
+            num_samples=4,
+            sampling_params=trio.SamplingParams(max_tokens=8, temperature=0.7),
+        ).result()
+
+        # 收集本组（同一 prompt 下 K 个 completion）的 reward，做 group-relative 归一化
+        group_rewards = [compute_reward(seq.text, float(gold)) for seq in sample_result.sequences]
+        group_arr = np.array(group_rewards, dtype=float)
+        group_advantages = (group_arr - group_arr.mean()) / (group_arr.std() + 1e-8)
+        all_rewards.extend(group_rewards)
+
+        for seq, adv in zip(sample_result.sequences, group_advantages):
+            completion_tokens = tokenizer.encode(seq.text, add_special_tokens=False)
+            if not completion_tokens:
+                continue
+
+            rollouts.append(
+                process_rollout(
+                    prompt_tokens=prompt_tokens,
+                    completion_tokens=completion_tokens,
+                    completion_logprobs=seq.logprobs,
+                    reward=float(adv),  # 用归一化后的 advantage 代替原始 reward
+                )
+            )
+
+    print(f"Iter {iteration} | mean reward: {np.mean(all_rewards):.4f} | samples: {len(rollouts)}")
+
+    # 4b. 用 rollouts 做一次策略更新（GRPO = ppo loss + group-relative advantages）
+    fb_result = train.forward_backward(rollouts, "ppo").result()
+    train.optim_step(trio.AdamParams(learning_rate=1e-5)).result()
+
+    # 4c. 监控 IS loss
+    logprobs = np.concatenate([to_np(o["logprobs"]) for o in fb_result.loss_fn_outputs])
+    weights = np.concatenate([to_np(ex.loss_fn_inputs["weights"]) for ex in rollouts])
+    old_logprobs = np.concatenate([to_np(ex.loss_fn_inputs["logprobs"]) for ex in rollouts])
+    advantages = np.concatenate([to_np(ex.loss_fn_inputs["advantages"]) for ex in rollouts])
+
+    mask = weights > 0
+    loss = -np.sum(np.exp(logprobs[mask] - old_logprobs[mask]) * advantages[mask]) / mask.sum()
+    print(f"Iter {iteration} IS loss: {loss:.4f}")
+
+# ========== 5. 保存最终权重 ==========
+final = train.save_weights_for_sampler("rl_final").result()
+print(f"最终权重: {final.path}")
