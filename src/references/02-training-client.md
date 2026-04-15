@@ -41,8 +41,16 @@ result = future.result()  # ForwardBackwardOutput
 | 值 | 必需的 loss_fn_inputs 字段 | 用途 |
 |---|---|---|
 | `"cross_entropy"` | `target_tokens`, 可选 `weights` | SFT 监督微调 |
-| `"importance_sampling"` | `target_tokens`, `logprobs`, `advantages` | 重要性采样 (GRPO 等) |
-| `"ppo"` | `target_tokens`, `logprobs`, `advantages` | PPO 训练 |
+| `"importance_sampling"` | `target_tokens`, `logprobs`, `advantages` | 无 clip 的 vanilla IS |
+| `"ppo"` | `target_tokens`, `logprobs`, `advantages` | PPO / GRPO（带 clip） |
+
+**loss_fn_config（仅 `"ppo"` 支持）：** 自定义 PPO 裁剪阈值，默认 ε=0.2（ratio 裁到 `[0.8, 1.2]`）
+```python
+train.forward_backward(
+    data=data, loss_fn="ppo",
+    loss_fn_config={"clip_low_threshold": 0.9, "clip_high_threshold": 1.1},
+)
+```
 
 **auto_shift 参数：**
 - `False`（默认）：用户自行对齐 input/target（input=[tok0, tok1, tok2]，target=[tok1, tok2, tok3]）
@@ -109,15 +117,6 @@ result = future.result()  # OptimStepResponse
 # SDK 默认值（和 PyTorch 不同）:
 #   learning_rate=1e-4, beta1=0.9, beta2=0.95, eps=1e-12, weight_decay=0.0
 # 若需与 PyTorch 行为一致（一般不需要），显式传 beta2=0.999, eps=1e-8
-```
-
-**loss_fn_config（仅 `"ppo"` 支持）：**
-```python
-# 自定义 PPO 裁剪阈值（默认 0.2）
-train.forward_backward(
-    data=data, loss_fn="ppo",
-    loss_fn_config={"clip_low_threshold": 0.9, "clip_high_threshold": 1.1},
-)
 ```
 
 ### save_state(name) -> APIFuture[SaveWeightsResponse]

@@ -108,10 +108,12 @@ sample = trio.Datum(
 fb = train.forward_backward(data=[sample], loss_fn="cross_entropy")
 result = fb.result()  # APIFuture -> ForwardBackwardOutput
 # result.metrics 的 key 是 "loss:sum"（注意冒号），不是 "loss"
-# per-token 归一化 loss（两种等价写法）:
-#   方式 A: result.metrics["loss:sum"] / sum(all_weights)
+# per-token 归一化 loss（两种等价写法，需 import numpy as np）:
+#   方式 A: loss_sum / total_weight_sum
+#          total_weight_sum = sum(sum(ex.loss_fn_inputs["weights"].tolist()) for ex in data)
 #   方式 B: -np.dot(logprobs, weights) / weights.sum()
-#          其中 logprobs 从 result.loss_fn_outputs[i]["logprobs"] 拼接
+#          logprobs = np.concatenate([o["logprobs"].tolist() for o in result.loss_fn_outputs])
+#          weights  = np.concatenate([ex.loss_fn_inputs["weights"].tolist() for ex in data])
 loss_sum = result.metrics.get("loss:sum", 0.0)
 train.optim_step(trio.AdamParams(learning_rate=1e-4)).result()
 ```
@@ -126,7 +128,7 @@ train.optim_step(trio.AdamParams(learning_rate=1e-4)).result()
 
 RL 场景的 `weights` 用于对 prompt 部分做 mask（0=ignore，1=计入 loss），不传则 prompt 也会参与策略梯度，通常会跑偏。官方所有 RL 示例都带 `weights`。
 
-`ppo` 可通过 `loss_fn_config` 自定义裁剪阈值（默认 0.2）:
+`ppo` 可通过 `loss_fn_config` 自定义裁剪阈值（默认 ε=0.2，即 ratio 裁到 `[0.8, 1.2]`）:
 ```python
 train.forward_backward(
     data=data, loss_fn="ppo",
