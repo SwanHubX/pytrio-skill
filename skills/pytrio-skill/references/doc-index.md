@@ -1,6 +1,25 @@
 # PyTRIO 官方文档索引
 
-写 PyTRIO/TRIO 代码前，优先把官方文档作为事实来源。
+写 PyTRIO/TRIO 代码时，先看本地 examples 能不能解决问题；示例覆盖不了或需要确认 API 细节时，再读取官方文档。
+
+## 本地示例代码
+
+后续新增示例时，优先在这里补充索引，方便 Agent 按任务快速找到可参考代码。
+
+| 示例 | 适用场景 | 重点参考 |
+|---|---|---|
+| `examples/quickstart_sft.py` | 最小 SFT、第一次跑通训练、保存权重后推理 | `Datum` 构造、prompt masking、`forward_backward`、`optim_step`、`save_weights_for_sampler` |
+| `examples/chat-huanhuan.py` | 真实角色微调、同步 SFT、SwanLab 记录 | JSON 数据集处理、chat template、逐 batch 记录 loss、训练前后推理对比 |
+| `examples/chat-huanhuan-async.py` | 异步 SFT、异步提交 batch、异步记录 SwanLab | `forward_backward_async`、`optim_step_async`、`asyncio.create_task`、后台 loss 计算和日志记录 |
+
+## 阅读建议
+
+- 写简单 SFT 时，先读 `examples/quickstart_sft.py`；如果需要 API 细节，再读训练、TrainingClient、Datum、ModelInput 和 AdamParams。
+- 写推理时，读取推理、SamplingClient、SamplingParams 和 ModelInput。
+- 接入数据集时，读取 HuggingFace datasets 和训练文档。
+- 做角色微调、同步/异步 SFT 或 SwanLab 训练记录时，先参考 `examples/chat-huanhuan.py` 与 `examples/chat-huanhuan-async.py`，再读取 Chat-甄嬛说明。
+- 训练后要用 OpenAI SDK 部署时，先保存权重，再读取 OpenAI 兼容 API。
+- 如果某个页面 404 或看起来过期，打开可视化文档页面，再根据当前导航推导 Markdown 路径。
 
 ## URL 规则
 
@@ -60,12 +79,3 @@ https://docs.pytrio.cn/docs/content/guide/train/content.md
 |---|---|
 | Chat-甄嬛 | https://docs.pytrio.cn/docs/content/example/chat_huanhuan/content.md |
 | GSM8K | https://docs.pytrio.cn/docs/content/example/gsm8k/content.md |
-
-## 阅读建议
-
-- 写 SFT 时，读取训练、TrainingClient、Datum、ModelInput、AdamParams 和快速开始示例。
-- 写推理时，读取推理、SamplingClient、SamplingParams 和 ModelInput。
-- 接入数据集时，读取 HuggingFace datasets 和训练文档。
-- 做角色微调、同步/异步 SFT 或 SwanLab 训练记录时，读取 Chat-甄嬛，并参考本 skill 的 `examples/chat-huanhuan.py` 与 `examples/chat-huanhuan-async.py`。
-- 训练后要用 OpenAI SDK 部署时，先保存权重，再读取 OpenAI 兼容 API。
-- 如果某个页面 404 或看起来过期，打开可视化文档页面，再根据当前导航推导 Markdown 路径。
