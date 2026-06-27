@@ -1,12 +1,15 @@
 <div align="center">
 
-<img src="images/TRIO_LOGO.svg" alt="TRIO" width="360" />
+<a href="https://pytrio.cn/">
+  <img src="images/TRIO_LOGO.svg" alt="TRIO" width="360" />
+</a>
 
-<h1>PyTRIO.skill</h1>
+<h1><a href="https://pytrio.cn/">PyTRIO.skill</a></h1>
 
 
 > 让 Agent 正确使用 PyTRIO 写训练、推理和实验记录代码。
 
+[![PyTRIO 官网](https://img.shields.io/badge/PyTRIO-官网-fc4547)](https://pytrio.cn/)
 [![PyTRIO Docs](https://img.shields.io/badge/PyTRIO-官方文档-ff6b57)](https://docs.pytrio.cn/docs)
 [![Agent Skill](https://img.shields.io/badge/Agent-Skill-7c3aed)](skills/pytrio-skill/SKILL.md)
 [![SwanLab](https://img.shields.io/badge/SwanLab-推荐记录工具-1f8f4c)](https://docs.swanlab.cn)
