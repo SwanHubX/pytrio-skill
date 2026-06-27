@@ -45,20 +45,6 @@ npx skills add SwanHubX/pytrio-skill -g -y
 npx skills update pytrio-skill -g -y
 ```
 
-手动安装发布包：
-
-```bash
-mkdir -p .claude/skills/pytrio-skill
-curl -sL https://github.com/SwanHubX/pytrio-skill/releases/latest/download/pytrio-skill.tar.gz | tar xz -C .claude/skills/pytrio-skill/
-```
-
-本地开发时也可以直接复制：
-
-```bash
-mkdir -p .claude/skills/pytrio-skill
-cp -R skills/pytrio-skill/. .claude/skills/pytrio-skill/
-```
-
 ## 内容
 
 ```text
