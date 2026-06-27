@@ -1,6 +1,8 @@
 ---
 name: pytrio-skill
 description: 使用 PyTRIO/TRIO 编写、调试或解释远程大模型训练与推理代码。用户提到 pytrio、TRIO、PyTRIO SDK、ServiceClient、TrainingClient、SamplingClient、LoRA 训练、SFT、异步 SFT、RL、GRPO/PPO、HuggingFace datasets、TRIO OpenAI 兼容 API、SwanLab 训练记录、权重保存、checkpoint 或远程 LLM 后训练时使用。
+metadata:
+  version: "0.1.0"
 ---
 
 # PyTRIO Skill
