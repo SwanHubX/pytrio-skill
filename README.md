@@ -7,7 +7,7 @@
 <h1><a href="https://pytrio.cn/">PyTRIO.skill</a></h1>
 
 
-> 让 Agent 正确使用 PyTRIO 写训练、推理和实验记录代码。
+> 让 Agent 正确使用 PyTRIO 写 SFT、GRPO、OPD、DPO、推理和实验记录代码。
 
 [![PyTRIO 官网](https://img.shields.io/badge/PyTRIO-官网-fc4547)](https://pytrio.cn/)
 [![PyTRIO Docs](https://img.shields.io/badge/PyTRIO-官方文档-ff6b57)](https://docs.pytrio.cn/docs)
@@ -19,7 +19,7 @@
 没有本地 GPU？没关系。  
 PyTRIO 把 LLM 后训练丢到云端执行，你只需要写数据、算法和训练循环。
 
-这个 Skill 会让 Claude Code、Codex 等 Agent 先读取 PyTRIO 官方 Markdown 文档，再参考内置示例生成代码，避免把 PyTorch / HuggingFace 的习惯误套到 PyTRIO 上。
+这个 Skill 会让 Claude Code、Codex 等 Agent 先按任务读取 SFT、GRPO、OPD、DPO/custom loss 的本地能力说明，再参考内置示例生成代码，避免把 PyTorch / HuggingFace 的习惯误套到 PyTRIO 上。
 
 [安装](#安装) · [内容](#内容) · [示例](#示例) · [SwanLab 记录](#swanlab-记录) · [打包](#打包)
 
@@ -53,25 +53,47 @@ skills/
     ├── SKILL.md
     ├── references/
     │   ├── doc-index.md
+    │   ├── sft.md
+    │   ├── grpo.md
+    │   ├── opd.md
+    │   ├── dpo.md
     │   └── chat-huanhuan.md
     └── examples/
         ├── quickstart_sft.py
         ├── chat-huanhuan.py
-        └── chat-huanhuan-async.py
+        ├── chat-huanhuan-async.py
+        ├── sft-distill-conversation.py
+        ├── sft-distill-conversation-async.py
+        ├── grpo-gsm8k.py
+        ├── grpo-gsm8k-async.py
+        ├── opd-deepmath.py
+        ├── opd-deepmath-async.py
+        └── dpo-hh-rlhf.py
 ```
 
 | 文件 | 作用 |
 |---|---|
-| `SKILL.md` | 轻量入口和任务路由，告诉 Agent 应该先读哪些官方文档 |
-| `references/doc-index.md` | PyTRIO 官方 Markdown 文档索引 |
+| `SKILL.md` | 轻量入口和任务路由，告诉 Agent 应该先读 SFT、GRPO、OPD 还是 DPO |
+| `references/doc-index.md` | PyTRIO 官方 Markdown 文档和本地示例索引 |
+| `references/sft.md` | SFT 数据构造、assistant-only loss mask、同步/异步训练模式 |
+| `references/grpo.md` | GRPO rollout、reward、group-relative advantage、`importance_sampling` 训练模式 |
+| `references/opd.md` | OPD student rollout、teacher logprob、reverse-KL advantage 训练模式 |
+| `references/dpo.md` | DPO chosen/rejected 偏好训练、reference logprob、custom loss |
 | `references/chat-huanhuan.md` | Chat-甄嬛案例、同步/异步 SFT、SwanLab 记录模式 |
 | `examples/quickstart_sft.py` | 最小 SFT 训练、保存权重、推理示例 |
 | `examples/chat-huanhuan.py` | 带 SwanLab 记录的同步 SFT 示例 |
 | `examples/chat-huanhuan-async.py` | 带 SwanLab 记录的异步 SFT 示例 |
+| `examples/sft-distill-conversation.py` | 多轮对话 SFT 蒸馏示例 |
+| `examples/sft-distill-conversation-async.py` | 异步多轮对话 SFT 蒸馏示例 |
+| `examples/grpo-gsm8k.py` | 同步 GRPO / GSM8K 示例 |
+| `examples/grpo-gsm8k-async.py` | 异步 GRPO / GSM8K 示例 |
+| `examples/opd-deepmath.py` | 同步 OPD / DeepMath 示例 |
+| `examples/opd-deepmath-async.py` | 异步 OPD / DeepMath 示例 |
+| `examples/dpo-hh-rlhf.py` | DPO / HH-RLHF / custom loss 示例 |
 
 ## 示例
 
-### 最小 SFT
+### SFT
 
 `examples/quickstart_sft.py` 展示最小闭环：
 
@@ -82,10 +104,42 @@ skills/
 5. 保存推理权重
 6. 创建 sampling client 做推理
 
-### Chat-甄嬛
-
 `examples/chat-huanhuan.py` 是同步版，适合先理解完整 SFT 流程。  
 `examples/chat-huanhuan-async.py` 是异步版，适合参考异步提交 batch、异步计算 loss、异步记录 SwanLab 的写法。
+
+`examples/sft-distill-conversation.py` 和异步版展示多轮对话蒸馏：system/user 只作为上下文，assistant 内容和结束标记参与 loss。
+
+新增示例里的相对数据路径默认按运行目录解析，例如 `./datasets/...`；不会把下载数据或 SwanLab 本地日志写进 skill 安装目录。
+
+### GRPO
+
+`examples/grpo-gsm8k.py` 和异步版展示 GSM8K 风格 RLVR：
+
+1. 用当前 student sampler 对同一题采样多个 completion
+2. 用 reward 函数打分
+3. 计算 group-relative advantage
+4. 构造 `importance_sampling` 所需的 `target_tokens`、old `logprobs`、`advantages`
+5. 调用 `forward_backward(..., loss_fn="importance_sampling")` 和 `optim_step`
+
+### OPD
+
+`examples/opd-deepmath.py` 和异步版展示 on-policy distillation：
+
+1. student 先对 prompt 采样 completion
+2. teacher 对 student 实际生成的 completion 计算 logprob
+3. 用 `student_logprob - teacher_logprob` 计算 reverse KL
+4. 用 `-kl_coef * reverse_kl` 作为 token-level advantage
+5. 通过 `importance_sampling` 更新 student
+
+### DPO
+
+`examples/dpo-hh-rlhf.py` 展示 preference training 和 custom loss：
+
+1. 把 HH-RLHF 样本解析成共同 prompt、chosen response、rejected response
+2. reference model 计算 chosen/rejected 的参考 logprob
+3. 当前 student 通过 `forward_backward_custom` 提供可求导 logprob
+4. 本地 torch loss 实现 DPO 公式并返回 metrics
+5. PyTRIO 继续负责远端 backward、optimizer step 和权重保存
 
 ## SwanLab 记录
 
@@ -97,7 +151,10 @@ pip install swanlab
 
 训练脚本建议记录：
 
-- `loss`
+- SFT：`loss`
+- GRPO：`reward`、`frac_degenerate`、`datums`
+- OPD：`opd/reverse_kl_mean`、`opd/reverse_kl_std`、completion token 指标
+- DPO：`dpo/loss`、`dpo/accuracy`、`dpo/margin`、chosen/rejected reward
 - `epoch` / `batch` / `global_step`
 - `base_model`
 - `dataset_path`
@@ -135,4 +192,5 @@ examples/
 - Skill 内部保持精简，不复制整站文档。
 - PyTRIO API 细节以官方 Markdown 文档为准。
 - 新案例优先放到 `skills/pytrio-skill/examples/`。
+- 入口文档保持能力导向，优先保证 Agent 会写 SFT、GRPO、OPD 和 DPO/custom loss。
 - 如果涉及实验记录和指标查询，优先配合 SwanLab Skill 使用。

@@ -11,10 +11,32 @@
 | `examples/quickstart_sft.py` | 最小 SFT、第一次跑通训练、保存权重后推理 | `Datum` 构造、prompt masking、`forward_backward`、`optim_step`、`save_weights_for_sampler` |
 | `examples/chat-huanhuan.py` | 真实角色微调、同步 SFT、SwanLab 记录 | JSON 数据集处理、chat template、逐 batch 记录 loss、训练前后推理对比 |
 | `examples/chat-huanhuan-async.py` | 异步 SFT、异步提交 batch、异步记录 SwanLab | `forward_backward_async`、`optim_step_async`、`asyncio.create_task`、后台 loss 计算和日志记录 |
+| `examples/sft-distill-conversation.py` | 多轮对话 SFT 蒸馏、conversation-mask | assistant-only loss mask、reasoning 数据过滤、多轮 ChatML 拼接 |
+| `examples/sft-distill-conversation-async.py` | 异步多轮对话 SFT 蒸馏 | 异步提交 batch、后台 loss 记录、保存权重后采样对比 |
+| `examples/grpo-gsm8k.py` | 同步 GRPO / GSM8K / reward-based RLVR | group rollout、reward、group-relative advantage、`importance_sampling` |
+| `examples/grpo-gsm8k-async.py` | 异步 GRPO / GSM8K | 并发 prompt rollout、异步 `importance_sampling` 训练 |
+| `examples/opd-deepmath.py` | 同步 OPD / DeepMath / teacher-KL 蒸馏 | student rollout、teacher `compute_logprobs`、reverse-KL advantage |
+| `examples/opd-deepmath-async.py` | 异步 OPD / DeepMath | 异步 student 采样、异步 teacher logprob、异步训练更新 |
+| `examples/dpo-hh-rlhf.py` | DPO / HH-RLHF / custom loss | chosen/rejected pair、reference logprob、`forward_backward_custom` |
+
+## 能力说明
+
+这些文件是 Agent 写代码前的主入口。示例代码只作为模板，字段语义以这里为准。
+
+| 能力 | 本地说明 |
+|---|---|
+| SFT | `references/sft.md` |
+| GRPO | `references/grpo.md` |
+| OPD | `references/opd.md` |
+| DPO / custom loss | `references/dpo.md` |
+| Chat-甄嬛案例 | `references/chat-huanhuan.md` |
 
 ## 阅读建议
 
-- 写简单 SFT 时，先读 `examples/quickstart_sft.py`；如果需要 API 细节，再读训练、TrainingClient、Datum、ModelInput 和 AdamParams。
+- 写 SFT 时，先读 `references/sft.md`，再按场景选择 `quickstart_sft.py`、`chat-huanhuan.py` 或 `sft-distill-conversation.py`。
+- 写 GRPO 时，先读 `references/grpo.md`，再参考 `grpo-gsm8k.py` 或异步版。
+- 写 OPD 时，先读 `references/opd.md`，再参考 `opd-deepmath.py` 或异步版。
+- 写 DPO 或 custom loss 时，先读 `references/dpo.md`，再参考 `dpo-hh-rlhf.py`。
 - 写推理时，读取推理、SamplingClient、SamplingParams 和 ModelInput。
 - 接入数据集时，读取 HuggingFace datasets 和训练文档。
 - 做角色微调、同步/异步 SFT 或 SwanLab 训练记录时，先参考 `examples/chat-huanhuan.py` 与 `examples/chat-huanhuan-async.py`，再读取 Chat-甄嬛说明。
@@ -51,6 +73,7 @@ https://docs.pytrio.cn/docs/content/guide/train/content.md
 | 快速开始 | https://docs.pytrio.cn/docs/content/quick-start/content.md |
 | 训练 | https://docs.pytrio.cn/docs/content/guide/train/content.md |
 | 推理/采样 | https://docs.pytrio.cn/docs/content/guide/sample/content.md |
+| 计算 logprobs | https://docs.pytrio.cn/docs/content/advanced/compute_logprobs/content.md |
 | 保存权重与继续训练 | https://docs.pytrio.cn/docs/content/guide/resume/content.md |
 | 下载权重 | https://docs.pytrio.cn/docs/content/guide/download/content.md |
 | 损失函数 | https://docs.pytrio.cn/docs/content/guide/loss_fn/content.md |
