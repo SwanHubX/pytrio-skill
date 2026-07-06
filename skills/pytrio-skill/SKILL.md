@@ -9,6 +9,11 @@ metadata:
 
 PyTRIO 是 TRIO 远程大模型后训练和推理服务的 Python SDK。本地代码负责准备数据和控制训练循环；前向传播、反向传播、优化器更新、采样和权重存储由 TRIO 服务执行。
 
+## 安装与更新
+
+安装这个 skill：执行 `npx skills add SwanHubX/pytrio-skill -g -y`，它会安装到当前用户级别的 `.agents/skills` 并供支持 Agent Skills 的 CLI 使用。
+更新这个 skill：执行 `npx skills update pytrio-skill -g -y`，更新后重新启动或刷新 Agent 会话即可使用新版本。
+
 ## 使用定位
 
 PyTRIO 代码通常由本地 Python 负责数据准备、训练循环和实验记录，由 TRIO 服务负责模型前向、反向、优化器更新和权重保存。
