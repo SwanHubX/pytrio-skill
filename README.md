@@ -1,7 +1,11 @@
 <div align="center">
 
 <a href="https://pytrio.cn/">
-  <img src="images/TRIO_LOGO.svg" alt="TRIO" width="360" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="images/TRIO_LOGO_DARK.svg" />
+    <source media="(prefers-color-scheme: light)" srcset="images/TRIO_LOGO.svg" />
+    <img src="images/TRIO_LOGO.svg" alt="TRIO" width="360" />
+  </picture>
 </a>
 
 <h1><a href="https://pytrio.cn/">PyTRIO.skill</a></h1>
