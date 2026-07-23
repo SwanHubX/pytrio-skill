@@ -28,6 +28,8 @@
 | SFT | `references/sft.md` |
 | GRPO | `references/grpo.md` |
 | OPD | `references/opd.md` |
+| Search-R1 / Agentic RL | `references/search-r1.md` |
+| OPSD / On-Policy Self-Distillation | `references/opsd.md` |
 | DPO / custom loss | `references/dpo.md` |
 | Chat-甄嬛案例 | `references/chat-huanhuan.md` |
 
@@ -36,6 +38,8 @@
 - 写 SFT 时，先读 `references/sft.md`，再按场景选择 `quickstart_sft.py`、`chat-huanhuan.py` 或 `sft-distill-conversation.py`。
 - 写 GRPO 时，先读 `references/grpo.md`，再参考 `grpo-gsm8k.py` 或异步版。
 - 写 OPD 时，先读 `references/opd.md`，再参考 `opd-deepmath.py` 或异步版。
+- 写 Search-R1 或多轮搜索工具训练时，先读 `references/search-r1.md`，需要完整项目时再读取其中的官方源码目录。
+- 写 OPSD 或 privileged self-distillation 时，先读 `references/opsd.md`，需要完整项目时再读取其中的官方源码目录。
 - 写 DPO 或 custom loss 时，先读 `references/dpo.md`，再参考 `dpo-hh-rlhf.py`。
 - 写推理时，读取推理、SamplingClient、SamplingParams 和 ModelInput。
 - 接入数据集时，读取 HuggingFace datasets 和训练文档。
@@ -102,3 +106,8 @@ https://docs.pytrio.cn/docs/content/guide/train/content.md
 |---|---|
 | Chat-甄嬛 | https://docs.pytrio.cn/docs/content/example/chat_huanhuan/content.md |
 | GSM8K | https://docs.pytrio.cn/docs/content/example/gsm8k/content.md |
+| GRPO | https://docs.pytrio.cn/docs/content/example/grpo/content.md |
+| On-Policy Distillation | https://docs.pytrio.cn/docs/content/example/opd/content.md |
+| Search-R1 | https://docs.pytrio.cn/docs/content/example/search-r1/content.md |
+| On-Policy Self-Distillation | https://docs.pytrio.cn/docs/content/example/opsd/content.md |
+| DPO | https://docs.pytrio.cn/docs/content/example/dpo/content.md |
