@@ -479,8 +479,6 @@ async def main(args: argparse.Namespace) -> None:
         # 无论中间是否报错，都尽量正常结束日志和远程训练 client。
         if swanlab_run is not None:
             swanlab.finish()
-        if training_client is not None:
-            await training_client.close_async()
 
 
 if __name__ == "__main__":

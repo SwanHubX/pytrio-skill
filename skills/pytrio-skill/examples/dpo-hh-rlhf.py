@@ -588,7 +588,6 @@ def main(args: argparse.Namespace) -> None:
     finally:
         if run is not None:
             swanlab.finish()
-        training_client.close()
 
 
 if __name__ == "__main__":
