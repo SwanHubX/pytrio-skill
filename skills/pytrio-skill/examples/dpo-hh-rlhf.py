@@ -265,8 +265,8 @@ def build_completion_datum(
     *,
     max_length: int,
     enable_thinking: bool,
-) -> trio.Datum | None:
-    """构造只在 assistant 回复 token 上有权重的 cross-entropy Datum。"""
+) -> tuple[trio.Datum, list[float]] | None:
+    """构造 forward Datum，并把 response mask 作为本地元数据返回。"""
     # prompt_tokens 应停在 assistant 开始生成的位置。
     prompt_tokens = encode_messages(
         tokenizer,
@@ -291,23 +291,22 @@ def build_completion_datum(
     if completion_len <= 0 or len(full_tokens) > max_length:
         return None
 
-    # prompt 部分权重为 0，response 部分权重为 1；右移后用 weights[1:] 对齐 target。
-    token_weights = [0.0] * len(prompt_tokens) + [1.0] * completion_len
+    # prompt 部分 mask 为 0，response 部分为 1；右移后与 target/logprob 对齐。
+    token_mask = [0.0] * len(prompt_tokens) + [1.0] * completion_len
     input_ids = full_tokens[:-1]
     target_ids = full_tokens[1:]
-    weights = token_weights[1:]
+    response_mask = token_mask[1:]
 
-    # DPO loss 只在 response token 上计算，所以 input_ids/target_ids/weights 长度必须一致。
-    if not (len(input_ids) == len(target_ids) == len(weights)):
+    if not (len(input_ids) == len(target_ids) == len(response_mask)):
         raise ValueError("DPO datum fields must have the same length")
 
-    return trio.Datum(
+    datum = trio.Datum(
         model_input=trio.ModelInput.from_ints(input_ids),
         loss_fn_inputs={
             "target_tokens": np.asarray(target_ids, dtype=np.int64),
-            "weights": np.asarray(weights, dtype=np.float32),
         },
     )
+    return datum, response_mask
 
 
 def build_pair_datums(
@@ -316,7 +315,7 @@ def build_pair_datums(
     *,
     max_length: int,
     enable_thinking: bool,
-) -> list[trio.Datum] | None:
+) -> tuple[list[trio.Datum], list[list[float]]] | None:
     chosen = build_completion_datum(
         tokenizer,
         pair.prompt_messages,
@@ -333,7 +332,9 @@ def build_pair_datums(
     )
     if chosen is None or rejected is None:
         return None
-    return [chosen, rejected]
+    chosen_datum, chosen_mask = chosen
+    rejected_datum, rejected_mask = rejected
+    return [chosen_datum, rejected_datum], [chosen_mask, rejected_mask]
 
 
 def build_step_batch(
@@ -341,9 +342,10 @@ def build_step_batch(
     tokenizer: Any,
     step: int,
     args: argparse.Namespace,
-) -> list[trio.Datum]:
-    """为一个 step 构造 chosen/rejected 交错排列的 batch。"""
+) -> tuple[list[trio.Datum], list[list[float]]]:
+    """构造 chosen/rejected 交错排列的 Datum 与同序 response mask。"""
     datums: list[trio.Datum] = []
+    response_masks: list[list[float]] = []
     start = step * args.batch_size
 
     for index in range(start, start + args.batch_size):
@@ -363,8 +365,10 @@ def build_step_batch(
             continue
 
         # DPO loss 按偶数/奇数下标配对：chosen_0, rejected_0, chosen_1, rejected_1...
-        datums.extend(pair_datums)
-    return datums
+        pair_data, pair_masks = pair_datums
+        datums.extend(pair_data)
+        response_masks.extend(pair_masks)
+    return datums, response_masks
 
 
 def datum_full_tokens(datum: trio.Datum) -> list[int]:
@@ -424,6 +428,7 @@ def compute_dpo_loss(
 
 def make_dpo_loss_fn(
     reference_logprobs: list[list[float]],
+    response_masks: list[list[float]],
     dpo_beta: float,
 ) -> Callable[[list[trio.Datum], list[Any]], tuple[Any, dict[str, float]]]:
     """创建 PyTRIO forward_backward_custom 使用的本地 DPO loss。
@@ -432,8 +437,18 @@ def make_dpo_loss_fn(
                                 - (log pi_rejected - log ref_rejected)))
     """
 
+    if len(reference_logprobs) != len(response_masks):
+        raise ValueError("reference logprobs and response masks must align")
+    batch_reference_logprobs = tuple(tuple(values) for values in reference_logprobs)
+    batch_response_masks = tuple(tuple(values) for values in response_masks)
+
     def dpo_loss_fn(data: list[trio.Datum], logprobs_list: list[Any]) -> tuple[Any, dict[str, float]]:
-        if len(data) != len(logprobs_list) or len(data) != len(reference_logprobs):
+        if not (
+            len(data)
+            == len(logprobs_list)
+            == len(batch_reference_logprobs)
+            == len(batch_response_masks)
+        ):
             raise ValueError("DPO loss got mismatched data/logprob lengths")
         if len(data) % 2 != 0:
             raise ValueError("DPO loss requires chosen/rejected pairs")
@@ -445,37 +460,48 @@ def make_dpo_loss_fn(
         rejected_ref_logprobs = []
 
         for index in range(0, len(data), 2):
-            chosen_datum = data[index]
-            rejected_datum = data[index + 1]
-            chosen_seq = logprobs_list[index].float()
-            rejected_seq = logprobs_list[index + 1].float()
+            chosen_seq = logprobs_list[index].float().reshape(-1)
+            rejected_seq = logprobs_list[index + 1].float().reshape(-1)
             device = chosen_seq.device
 
-            chosen_weights = torch.as_tensor(
-                chosen_datum.loss_fn_inputs["weights"].data,
+            chosen_mask = torch.as_tensor(
+                batch_response_masks[index],
                 dtype=torch.float32,
                 device=device,
             )
-            rejected_weights = torch.as_tensor(
-                rejected_datum.loss_fn_inputs["weights"].data,
+            rejected_mask = torch.as_tensor(
+                batch_response_masks[index + 1],
                 dtype=torch.float32,
                 device=rejected_seq.device,
             )
             chosen_ref_seq = torch.as_tensor(
-                reference_logprobs[index],
+                batch_reference_logprobs[index],
                 dtype=torch.float32,
                 device=device,
             )
             rejected_ref_seq = torch.as_tensor(
-                reference_logprobs[index + 1],
+                batch_reference_logprobs[index + 1],
                 dtype=torch.float32,
                 device=rejected_seq.device,
             )
 
-            chosen_logprobs.append(torch.dot(chosen_seq, chosen_weights))
-            rejected_logprobs.append(torch.dot(rejected_seq, rejected_weights))
-            chosen_ref_logprobs.append(torch.dot(chosen_ref_seq, chosen_weights))
-            rejected_ref_logprobs.append(torch.dot(rejected_ref_seq, rejected_weights))
+            if not (
+                chosen_seq.numel()
+                == chosen_mask.numel()
+                == chosen_ref_seq.numel()
+            ):
+                raise ValueError("Chosen DPO logprobs and response mask must align")
+            if not (
+                rejected_seq.numel()
+                == rejected_mask.numel()
+                == rejected_ref_seq.numel()
+            ):
+                raise ValueError("Rejected DPO logprobs and response mask must align")
+
+            chosen_logprobs.append(torch.dot(chosen_seq, chosen_mask))
+            rejected_logprobs.append(torch.dot(rejected_seq, rejected_mask))
+            chosen_ref_logprobs.append(torch.dot(chosen_ref_seq, chosen_mask))
+            rejected_ref_logprobs.append(torch.dot(rejected_ref_seq, rejected_mask))
 
         return compute_dpo_loss(
             chosen_logprobs=chosen_logprobs,
@@ -537,7 +563,7 @@ def main(args: argparse.Namespace) -> None:
     try:
         for step in range(args.steps):
             step_start = time.time()
-            data = build_step_batch(dataset, tokenizer, step, args)
+            data, response_masks = build_step_batch(dataset, tokenizer, step, args)
             if not data:
                 raise RuntimeError(
                     "No valid DPO pairs were built. Increase --max-length or --sample-size."
@@ -550,7 +576,7 @@ def main(args: argparse.Namespace) -> None:
             )
             fwd_bwd = training_client.forward_backward_custom(
                 data,
-                make_dpo_loss_fn(reference_logprobs, args.dpo_beta),
+                make_dpo_loss_fn(reference_logprobs, response_masks, args.dpo_beta),
             )
             optim = training_client.optim_step(adam)
             fwd_bwd_result = fwd_bwd.result()
