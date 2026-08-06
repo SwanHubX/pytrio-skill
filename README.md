@@ -11,19 +11,22 @@
 <h1><a href="https://pytrio.cn/">PyTRIO.skill</a></h1>
 
 
-> 让 Agent 正确使用 PyTRIO 写 SFT、GRPO、OPD、Search-R1、OPSD、DPO、推理和实验记录代码。
+> 让 Agent 正确使用 PyTRIO 写 SFT、GRPO、OPD、Search-R1、ReTool、OPSD、DAPO、GSPO、ALFWorld、自定义损失函数、DPO、推理和实验记录代码。
 
 [![PyTRIO 官网](https://img.shields.io/badge/PyTRIO-官网-fc4547)](https://pytrio.cn/)
 [![PyTRIO Docs](https://img.shields.io/badge/PyTRIO-官方文档-ff6b57)](https://docs.pytrio.cn/docs)
 [![ModelScope Skill](https://img.shields.io/badge/ModelScope-Skill-624aff)](https://www.modelscope.cn/skills/SwanLab/pytrio-skill/summary)
 [![Agent Skill](https://img.shields.io/badge/Agent-Skill-7c3aed)](skills/pytrio-skill/SKILL.md)
+[![Skill Version](https://img.shields.io/badge/Skill-v0.2.0-7c3aed)](skills/pytrio-skill/SKILL.md)
 [![SwanLab](https://img.shields.io/badge/SwanLab-推荐记录工具-1f8f4c)](https://docs.swanlab.cn)
 [![License](https://img.shields.io/badge/License-MIT-d4a017)](LICENSE)
 
 没有本地 GPU？没关系。  
 PyTRIO 把 LLM 后训练丢到云端执行，你只需要写数据、算法和训练循环。
 
-这个 Skill 会让 Claude Code、Codex 等 Agent 先按任务读取 SFT、GRPO、OPD、Search-R1、OPSD、DPO/custom loss 的本地能力说明，再参考内置示例或官方完整项目生成代码，避免把 PyTorch / HuggingFace 的习惯误套到 PyTRIO 上。
+这个 Skill 会让 Claude Code、Codex 等 Agent 先按任务读取 SFT、GRPO、OPD、Search-R1、ReTool、OPSD、DAPO、GSPO、ALFWorld、Custom Loss、DPO 的本地能力说明，再参考内置示例或完整项目生成代码，避免把 PyTorch / HuggingFace 的习惯误套到 PyTRIO 上。
+
+Medical OPD、Search-R1、OPSD、ReTool、DAPO、GSPO 和 ALFWorld 的多文件案例来自 [agentic-rl-lab](https://github.com/KMnO4-zx/agentic-rl-lab)。Skill 保留源码链接与固定 commit 链接，方便在最新版实现和核对版本之间切换。
 
 [安装](#安装) · [内容](#内容) · [示例](#示例) · [SwanLab 记录](#swanlab-记录) · [打包](#打包)
 
@@ -70,7 +73,12 @@ skills/
     │   ├── grpo.md
     │   ├── opd.md
     │   ├── search-r1.md
+    │   ├── retool.md
     │   ├── opsd.md
+    │   ├── dapo.md
+    │   ├── gspo.md
+    │   ├── alfworld.md
+    │   ├── custom-loss.md
     │   ├── dpo.md
     │   └── chat-huanhuan.md
     └── examples/
@@ -88,14 +96,19 @@ skills/
 
 | 文件 | 作用 |
 |---|---|
-| `SKILL.md` | 轻量入口和任务路由，告诉 Agent 应该先读 SFT、GRPO、OPD、Search-R1、OPSD 还是 DPO |
+| `SKILL.md` | 轻量入口和任务路由，告诉 Agent 应该先读哪一种训练或 Agentic RL 能力说明 |
 | `references/doc-index.md` | PyTRIO 官方 Markdown 文档和本地示例索引 |
 | `references/sft.md` | SFT 数据构造、assistant-only loss mask、同步/异步训练模式 |
 | `references/grpo.md` | GRPO rollout、reward、group-relative advantage、`importance_sampling` 训练模式 |
-| `references/opd.md` | OPD student rollout、teacher logprob、reverse-KL advantage 训练模式 |
+| `references/opd.md` | OPD student rollout、teacher logprob、reverse-KL advantage、Medical OPD 与多 Teacher 调度 |
 | `references/search-r1.md` | Search-R1 多轮工具状态机、结果 reward、observation mask、长轨迹拆批 |
+| `references/retool.md` | ReTool 代码解释器轨迹、token 连续性、outcome reward 与本地执行隔离 |
 | `references/opsd.md` | OPSD 同模型 Student / privileged Teacher、sampled-token reverse-KL |
-| `references/dpo.md` | DPO chosen/rejected 偏好训练、reference logprob、custom loss |
+| `references/dapo.md` | DAPO Dynamic Sampling、Clip-Higher、token mean、Soft Overlong 与成本口径 |
+| `references/gspo.md` | GSPO 序列级重要性比率、序列级裁剪、退化组归一化 |
+| `references/alfworld.md` | ALFWorld / TextWorld 独立环境、长轨迹 observation mask、PPO 与评测边界 |
+| `references/custom-loss.md` | `forward_backward_custom`、闭包元数据、本地 autograd、异步调用与 surrogate gradient |
+| `references/dpo.md` | DPO chosen/rejected 偏好训练、reference logprob、pairwise loss |
 | `references/chat-huanhuan.md` | Chat-甄嬛案例、同步/异步 SFT、SwanLab 记录模式 |
 | `examples/quickstart_sft.py` | 最小 SFT 训练、保存权重、推理示例 |
 | `examples/chat-huanhuan.py` | 带 SwanLab 记录的同步 SFT 示例 |
@@ -148,6 +161,8 @@ skills/
 4. 用 `-kl_coef * reverse_kl` 作为 token-level advantage
 5. 通过 `importance_sampling` 更新 student
 
+`references/opd.md` 还覆盖 `agentic-rl-lab/02-opd` 中的 Medical SFT → OPD、多 Teacher SAR/IDT 调度、`sampler_weights` 与 `training_state` 边界，以及 held-out 医疗评测限制。
+
 ### Search-R1
 
 `references/search-r1.md` 对齐官方多文件案例，重点说明：
@@ -158,6 +173,16 @@ skills/
 4. 长轨迹先构造完整 Datum，再拆 micro-batch 累积梯度并只做一次 optimizer step
 5. 搜索后端保持固定，训练的是模型 LoRA 的工具使用与回答策略
 
+### ReTool
+
+`references/retool.md` 对齐代码解释器 Agent 案例：
+
+1. 使用模型原生 tool-call 协议组织 code-interlaced rollout
+2. 延续真实 sampler token 前缀，避免重编码破坏 old logprob 对齐
+3. 只给最终答案 outcome reward，代码执行结果进入上下文但不参与 loss
+4. 按完整 logical batch 累积梯度，并处理不同 micro-batch 的权重
+5. 明确本地 subprocess 的安全边界；运行不可信代码时使用容器或专用沙箱
+
 ### OPSD
 
 `references/opsd.md` 对齐官方 On-Policy Self-Distillation 案例：
@@ -167,6 +192,46 @@ skills/
 3. Teacher 不重新采样，只对 Student completion 调 `compute_logprobs`
 4. 用 sampled-token reverse KL 构造逐 token advantage
 5. 参考解答只改变 Teacher 条件分布，不是 Student 的 SFT label
+
+### DAPO
+
+`references/dapo.md` 说明同一训练骨架中的 GRPO / DAPO 机制对照：
+
+1. Dynamic Sampling 按原始 correctness 筛选有效组并限制补采预算
+2. Clip-Higher 使用非对称 PPO clip
+3. Token-level Policy Gradient Loss 按全部 completion token 归一化
+4. Soft Overlong 在长度上限前平滑加入惩罚
+5. 候选 token、有效训练 token、refill 等待时间分别记账
+
+### GSPO
+
+`references/gspo.md` 说明 sequence-level policy optimization：
+
+1. 对 completion token 概率比取几何平均，得到一条序列共享的 ratio
+2. 对完整 sequence ratio 做一次窄范围裁剪
+3. prompt token 不进入 ratio，退化组可以跳过远端计算
+4. loss 仍使用原始 rollout batch 分母，避免过滤零目标后放大梯度
+5. 将格式、长度和准确率结果分开解释，并保留 matched GRPO 对照边界
+
+### ALFWorld
+
+`references/alfworld.md` 说明 text-only 环境中的长轨迹 Agentic RL：
+
+1. 同一游戏创建多个独立环境实例，保证 group 任务一致且状态互不污染
+2. assistant action token 参与 PPO，环境 observation token 只进入上下文
+3. 使用终局成功与非法动作惩罚计算同游戏 group-relative advantage
+4. 分别统计 prefill、sampling 与 training token 成本
+5. Base 与 checkpoint 固定 seen/unseen split、环境预算和评测协议
+
+### Custom Loss
+
+`references/custom-loss.md` 对齐[官网自定义损失函数文档](https://docs.pytrio.com/docs/guide/custom_loss)：
+
+1. `loss_fn(data, logprobs)` 在本地 PyTorch 进程执行并返回 `(loss, metrics)`
+2. `Datum.loss_fn_inputs` 只提供与 `model_input` 等长的 `target_tokens`
+3. sampling/reference logprob、mask、advantage 和分组信息通过每个 batch 独立的闭包传入
+4. 本地 autograd 计算 `dL / dlogprob`，服务端用 surrogate objective 完成模型反向传播
+5. 优先使用 `forward_backward_custom_async()`，并正确等待提交与远程完成两层 future
 
 ### DPO
 
@@ -192,7 +257,12 @@ pip install swanlab
 - GRPO：`reward`、`frac_degenerate`、`datums`
 - OPD：`opd/reverse_kl_mean`、`opd/reverse_kl_std`、completion token 指标
 - Search-R1：`reward/correct`、`reward/format`、`rollout/turns`、`search/success_rate`、`search/error_rate`
+- ReTool：`reward/correct`、`rollout/code_calls`、`sandbox/success_rate`、`sandbox/timeout_rate`
 - OPSD：`trainer/loss_mean`、`opd/reverse_kl_mean`、`opd/reverse_kl_std`、`opd/advantage_mean`
+- DAPO：`candidate_groups`、`effective_groups`、`oversample_ratio`、`ppo/clip_fraction`、候选/训练 token
+- GSPO：`gspo/seq_ratio_mean`、`gspo/sequence_clip_fraction`、`gspo/normalization_sequences`、有效序列比例
+- ALFWorld：`reward/success_rate`、`rollout/steps_mean`、`rollout/invalid_actions_mean`、prefill/sample/train token
+- Custom loss：算法 loss/ratio/clip 指标、有效 token、归一化分母、远端与本地计算时间
 - DPO：`dpo/loss`、`dpo/accuracy`、`dpo/margin`、chosen/rejected reward
 - `epoch` / `batch` / `global_step`
 - `base_model`
@@ -230,6 +300,6 @@ examples/
 
 - Skill 内部保持精简，不复制整站文档。
 - PyTRIO API 细节以官方 Markdown 文档为准。
-- 单文件案例优先放到 `skills/pytrio-skill/examples/`；包含数据、环境、训练和评测的多文件案例保留官方源码目录，并在 `references/` 说明关键实现边界。
-- 入口文档保持能力导向，优先保证 Agent 会写 SFT、GRPO、OPD、Search-R1、OPSD 和 DPO/custom loss。
+- 单文件案例优先放到 `skills/pytrio-skill/examples/`；包含数据、环境、训练和评测的多文件案例保留完整源码目录，并在 `references/` 说明关键实现边界。
+- 入口文档保持能力导向，优先保证 Agent 能按任务路由到对应训练、Agentic RL 或 custom loss 说明。
 - 如果涉及实验记录和指标查询，优先配合 SwanLab Skill 使用。

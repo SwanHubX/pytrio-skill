@@ -29,18 +29,28 @@
 | GRPO | `references/grpo.md` |
 | OPD | `references/opd.md` |
 | Search-R1 / Agentic RL | `references/search-r1.md` |
+| ReTool / 代码解释器 Agent | `references/retool.md` |
 | OPSD / On-Policy Self-Distillation | `references/opsd.md` |
-| DPO / custom loss | `references/dpo.md` |
+| DAPO / Dynamic Sampling | `references/dapo.md` |
+| GSPO / sequence-level policy optimization | `references/gspo.md` |
+| ALFWorld / TextWorld Agentic RL | `references/alfworld.md` |
+| Custom loss / `forward_backward_custom` | `references/custom-loss.md` |
+| DPO / preference training | `references/dpo.md` |
 | Chat-甄嬛案例 | `references/chat-huanhuan.md` |
 
 ## 阅读建议
 
 - 写 SFT 时，先读 `references/sft.md`，再按场景选择 `quickstart_sft.py`、`chat-huanhuan.py` 或 `sft-distill-conversation.py`。
 - 写 GRPO 时，先读 `references/grpo.md`，再参考 `grpo-gsm8k.py` 或异步版。
-- 写 OPD 时，先读 `references/opd.md`，再参考 `opd-deepmath.py` 或异步版。
-- 写 Search-R1 或多轮搜索工具训练时，先读 `references/search-r1.md`，需要完整项目时再读取其中的官方源码目录。
-- 写 OPSD 或 privileged self-distillation 时，先读 `references/opsd.md`，需要完整项目时再读取其中的官方源码目录。
-- 写 DPO 或 custom loss 时，先读 `references/dpo.md`，再参考 `dpo-hh-rlhf.py`。
+- 写 OPD 时，先读 `references/opd.md`，再参考 `opd-deepmath.py` 或异步版；Medical OPD 和多 Teacher 实验按其中的完整案例组织。
+- 写 Search-R1 或多轮搜索工具训练时，先读 `references/search-r1.md`，需要完整项目时再读取其中的源码目录。
+- 写 ReTool、代码解释器 Agent 或 code-interlaced RL 时，先读 `references/retool.md`，并先确认执行隔离方案。
+- 写 OPSD 或 privileged self-distillation 时，先读 `references/opsd.md`，需要完整项目时再读取其中的源码目录。
+- 写 DAPO 时，先读 `references/dapo.md`，同时核对 Dynamic Sampling、token mean、Clip-Higher 和 Soft Overlong。
+- 写 GSPO 时，先读 `references/gspo.md`，重点核对 sequence ratio、序列级裁剪和原始 batch 分母。
+- 写 ALFWorld / TextWorld 长轨迹训练时，先读 `references/alfworld.md`，核对同游戏独立环境、observation mask 和环境清理。
+- 写通用 custom loss 时，先读 `references/custom-loss.md`，核对函数签名、闭包元数据和 async 的两次 `await`。
+- 写 DPO 时，先读 `references/custom-loss.md` 和 `references/dpo.md`，再参考 `dpo-hh-rlhf.py`。
 - 写推理时，读取推理、SamplingClient、SamplingParams 和 ModelInput。
 - 接入数据集时，读取 HuggingFace datasets 和训练文档。
 - 做角色微调、同步/异步 SFT 或 SwanLab 训练记录时，先参考 `examples/chat-huanhuan.py` 与 `examples/chat-huanhuan-async.py`，再读取 Chat-甄嬛说明。
@@ -81,6 +91,7 @@ https://docs.pytrio.cn/docs/content/guide/train/content.md
 | 保存权重与继续训练 | https://docs.pytrio.cn/docs/content/guide/resume/content.md |
 | 下载权重 | https://docs.pytrio.cn/docs/content/guide/download/content.md |
 | 损失函数 | https://docs.pytrio.cn/docs/content/guide/loss_fn/content.md |
+| 自定义损失函数 | https://docs.pytrio.com/docs/content/guide/custom_loss/content.md |
 | 异步 | https://docs.pytrio.cn/docs/content/guide/async/content.md |
 | HuggingFace datasets | https://docs.pytrio.cn/docs/content/advanced/datasets/content.md |
 | OpenAI 兼容 API | https://docs.pytrio.cn/docs/content/advanced/openai/content.md |
@@ -111,3 +122,17 @@ https://docs.pytrio.cn/docs/content/guide/train/content.md
 | Search-R1 | https://docs.pytrio.cn/docs/content/example/search-r1/content.md |
 | On-Policy Self-Distillation | https://docs.pytrio.cn/docs/content/example/opsd/content.md |
 | DPO | https://docs.pytrio.cn/docs/content/example/dpo/content.md |
+
+## Agentic RL 完整案例
+
+以下多文件案例来自 `agentic-rl-lab`，包含数据、环境、训练、评测与分析代码。本 Skill 按 commit `906d54e` 核对；读取最新实现时使用 `main` 链接，复核字段和实验结论时可使用固定版本链接。
+
+| 案例 | 最新源码 | 本 Skill 核对版本 |
+|---|---|---|
+| Medical OPD / SAR-OPD / IDT-OPD | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/02-opd | https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/02-opd |
+| Search-R1 | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/03-search-r1 | https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/03-search-r1 |
+| OPSD | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/04-opsd | https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/04-opsd |
+| ReTool | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/05-retool | https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/05-retool |
+| DAPO | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/06-dapo | https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/06-dapo |
+| GSPO | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/07-gspo | https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/07-gspo |
+| ALFWorld Agentic RL | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/08-alfworld | https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/08-alfworld |
