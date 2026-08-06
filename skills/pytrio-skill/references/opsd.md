@@ -21,8 +21,8 @@ OPSD 是包含数据准备、同步/异步训练、评测和分析的多文件�
 
 - 官方案例：https://docs.pytrio.com/docs/example/opsd
 - 官方 Markdown：https://docs.pytrio.cn/docs/content/example/opsd/content.md
-- 完整代码：https://github.com/KMnO4-zx/llm-agent-rl-lab/tree/main/04-opsd
-- 文档核对版本：https://github.com/KMnO4-zx/llm-agent-rl-lab/tree/52c2f1c/04-opsd
+- 完整代码：https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/04-opsd
+- 本 Skill 核对版本：https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/04-opsd
 
 生成可运行项目时，优先沿用完整源码目录；本文件用于保证 Student / Teacher、token 对齐和 on-policy 边界正确。
 

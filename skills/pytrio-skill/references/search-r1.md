@@ -19,8 +19,8 @@ Search-R1 是多文件案例，不适合压缩成单个 example：
 
 - 官方案例：https://docs.pytrio.com/docs/example/search-r1
 - 官方 Markdown：https://docs.pytrio.cn/docs/content/example/search-r1/content.md
-- 完整代码：https://github.com/KMnO4-zx/llm-agent-rl-lab/tree/main/03-search-r1
-- 文档核对版本：https://github.com/KMnO4-zx/llm-agent-rl-lab/tree/52c2f1c/03-search-r1
+- 完整代码：https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/03-search-r1
+- 本 Skill 核对版本：https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/03-search-r1
 
 需要生成可运行项目时，先沿用完整代码目录的模块划分，再按用户要求替换数据、搜索后端和 reward；不要把状态机、搜索客户端、训练和评测压进一个脚本。
 
