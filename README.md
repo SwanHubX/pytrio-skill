@@ -2,13 +2,13 @@
 
 <a href="https://pytrio.cn/">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="images/TRIO_LOGO_DARK.svg" />
-    <source media="(prefers-color-scheme: light)" srcset="images/TRIO_LOGO.svg" />
-    <img src="images/TRIO_LOGO.svg" alt="TRIO" width="360" />
+    <source media="(prefers-color-scheme: dark)" srcset="images/TRIO_LOGO_DARK.png" />
+    <source media="(prefers-color-scheme: light)" srcset="images/TRIO_LOGO.png" />
+    <img src="images/TRIO_LOGO.png" alt="TRIO"/>
   </picture>
 </a>
 
-<h1><a href="https://pytrio.cn/">PyTRIO.skill</a></h1>
+<h1><a href="https://pytrio.com/">PyTRIO.skill</a></h1>
 
 
 > 让 Agent 正确使用 PyTRIO 写 SFT、GRPO、OPD、Search-R1、ReTool、OPSD、DAPO、GSPO、ALFWorld、自定义损失函数、DPO、推理和实验记录代码。
