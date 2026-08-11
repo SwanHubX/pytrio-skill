@@ -15,6 +15,7 @@
 | `examples/sft-distill-conversation-async.py` | 异步多轮对话 SFT 蒸馏 | 异步提交 batch、后台 loss 记录、保存权重后采样对比 |
 | `examples/grpo-gsm8k.py` | 同步 GRPO / GSM8K / reward-based RLVR | group rollout、reward、group-relative advantage、`importance_sampling` |
 | `examples/grpo-gsm8k-async.py` | 异步 GRPO / GSM8K | 并发 prompt rollout、异步 `importance_sampling` 训练 |
+| `examples/vision-grpo.py` | Vision GRPO / GeoQA / 多模态 RLVR | `ImageChunk.expected_tokens`、图文 chunks、异步 group rollout、prompt/image mask |
 | `examples/opd-deepmath.py` | 同步 OPD / DeepMath / teacher-KL 蒸馏 | student rollout、teacher `compute_logprobs`、reverse-KL advantage |
 | `examples/opd-deepmath-async.py` | 异步 OPD / DeepMath | 异步 student 采样、异步 teacher logprob、异步训练更新 |
 | `examples/dpo-hh-rlhf.py` | DPO / HH-RLHF / custom loss | chosen/rejected pair、reference logprob、`forward_backward_custom` |
@@ -26,6 +27,7 @@
 | 能力 | 本地说明 |
 |---|---|
 | SFT | `references/sft.md` |
+| 多模态推理 / 多模态 SFT / Vision GRPO | `references/vision.md` |
 | GRPO | `references/grpo.md` |
 | OPD | `references/opd.md` |
 | Search-R1 / Agentic RL | `references/search-r1.md` |
@@ -41,6 +43,8 @@
 ## 阅读建议
 
 - 写 SFT 时，先读 `references/sft.md`，再按场景选择 `quickstart_sft.py`、`chat-huanhuan.py` 或 `sft-distill-conversation.py`。
+- 写图像输入或多模态 SFT 时，先确认 `pytrio>=0.2.7`，再读 `references/vision.md`。
+- 写 Vision GRPO 时，先读 `references/vision.md`，再参考 `examples/vision-grpo.py`；固定测试集与评测按其中的完整 GeoQA 项目核对。
 - 写 GRPO 时，先读 `references/grpo.md`，再参考 `grpo-gsm8k.py` 或异步版。
 - 写 OPD 时，先读 `references/opd.md`，再参考 `opd-deepmath.py` 或异步版；Medical OPD 和多 Teacher 实验按其中的完整案例组织。
 - 写 Search-R1 或多轮搜索工具训练时，先读 `references/search-r1.md`，需要完整项目时再读取其中的源码目录。
@@ -87,6 +91,7 @@ https://docs.pytrio.cn/docs/content/guide/train/content.md
 | 快速开始 | https://docs.pytrio.cn/docs/content/quick-start/content.md |
 | 训练 | https://docs.pytrio.cn/docs/content/guide/train/content.md |
 | 推理/采样 | https://docs.pytrio.cn/docs/content/guide/sample/content.md |
+| 多模态 | https://docs.pytrio.com/docs/content/guide/vision/content.md |
 | 计算 logprobs | https://docs.pytrio.cn/docs/content/advanced/compute_logprobs/content.md |
 | 保存权重与继续训练 | https://docs.pytrio.cn/docs/content/guide/resume/content.md |
 | 下载权重 | https://docs.pytrio.cn/docs/content/guide/download/content.md |
@@ -118,14 +123,15 @@ https://docs.pytrio.cn/docs/content/guide/train/content.md
 | Chat-甄嬛 | https://docs.pytrio.cn/docs/content/example/chat_huanhuan/content.md |
 | GSM8K | https://docs.pytrio.cn/docs/content/example/gsm8k/content.md |
 | GRPO | https://docs.pytrio.cn/docs/content/example/grpo/content.md |
+| Vision GRPO | https://docs.pytrio.com/docs/content/example/vision-grpo/content.md |
 | On-Policy Distillation | https://docs.pytrio.cn/docs/content/example/opd/content.md |
 | Search-R1 | https://docs.pytrio.cn/docs/content/example/search-r1/content.md |
 | On-Policy Self-Distillation | https://docs.pytrio.cn/docs/content/example/opsd/content.md |
 | DPO | https://docs.pytrio.cn/docs/content/example/dpo/content.md |
 
-## Agentic RL 完整案例
+## 多文件完整案例
 
-以下多文件案例来自 `agentic-rl-lab`，包含数据、环境、训练、评测与分析代码。本 Skill 按 commit `906d54e` 核对；读取最新实现时使用 `main` 链接，复核字段和实验结论时可使用固定版本链接。
+以下多文件案例来自 `agentic-rl-lab`，包含数据、环境、训练、评测与分析代码。读取最新实现时使用 `main` 链接；复核字段和实验结论时使用表格中的实际核对版本。
 
 | 案例 | 最新源码 | 本 Skill 核对版本 |
 |---|---|---|
@@ -136,3 +142,4 @@ https://docs.pytrio.cn/docs/content/guide/train/content.md
 | DAPO | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/06-dapo | https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/06-dapo |
 | GSPO | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/07-gspo | https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/07-gspo |
 | ALFWorld Agentic RL | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/08-alfworld | https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/08-alfworld |
+| Vision GRPO / GeoQA | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/09-vision-grpo | https://github.com/KMnO4-zx/agentic-rl-lab/tree/cc59b115/09-vision-grpo |

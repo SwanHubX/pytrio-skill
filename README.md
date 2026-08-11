@@ -11,22 +11,22 @@
 <h1><a href="https://pytrio.com/">PyTRIO.skill</a></h1>
 
 
-> 让 Agent 正确使用 PyTRIO 写 SFT、GRPO、OPD、Search-R1、ReTool、OPSD、DAPO、GSPO、ALFWorld、自定义损失函数、DPO、推理和实验记录代码。
+> 让 Agent 正确使用 PyTRIO 写 SFT、多模态推理与训练、Vision GRPO、GRPO、OPD、Search-R1、ReTool、OPSD、DAPO、GSPO、ALFWorld、自定义损失函数、DPO、推理和实验记录代码。
 
 [![PyTRIO 官网](https://img.shields.io/badge/PyTRIO-官网-fc4547)](https://pytrio.cn/)
 [![PyTRIO Docs](https://img.shields.io/badge/PyTRIO-官方文档-ff6b57)](https://docs.pytrio.cn/docs)
 [![ModelScope Skill](https://img.shields.io/badge/ModelScope-Skill-624aff)](https://www.modelscope.cn/skills/SwanLab/pytrio-skill/summary)
 [![Agent Skill](https://img.shields.io/badge/Agent-Skill-7c3aed)](skills/pytrio-skill/SKILL.md)
-[![Skill Version](https://img.shields.io/badge/Skill-v0.2.0-7c3aed)](skills/pytrio-skill/SKILL.md)
+[![Skill Version](https://img.shields.io/badge/Skill-v0.2.1-7c3aed)](skills/pytrio-skill/SKILL.md)
 [![SwanLab](https://img.shields.io/badge/SwanLab-推荐记录工具-1f8f4c)](https://docs.swanlab.cn)
 [![License](https://img.shields.io/badge/License-MIT-d4a017)](LICENSE)
 
 没有本地 GPU？没关系。  
 PyTRIO 把 LLM 后训练丢到云端执行，你只需要写数据、算法和训练循环。
 
-这个 Skill 会让 Claude Code、Codex 等 Agent 先按任务读取 SFT、GRPO、OPD、Search-R1、ReTool、OPSD、DAPO、GSPO、ALFWorld、Custom Loss、DPO 的本地能力说明，再参考内置示例或完整项目生成代码，避免把 PyTorch / HuggingFace 的习惯误套到 PyTRIO 上。
+这个 Skill 会让 Claude Code、Codex 等 Agent 先按任务读取 SFT、多模态与 Vision GRPO、GRPO、OPD、Search-R1、ReTool、OPSD、DAPO、GSPO、ALFWorld、Custom Loss、DPO 的本地能力说明，再参考内置示例或完整项目生成代码，避免把 PyTorch / HuggingFace 的习惯误套到 PyTRIO 上。
 
-Medical OPD、Search-R1、OPSD、ReTool、DAPO、GSPO 和 ALFWorld 的多文件案例来自 [agentic-rl-lab](https://github.com/KMnO4-zx/agentic-rl-lab)。Skill 保留源码链接与固定 commit 链接，方便在最新版实现和核对版本之间切换。
+Medical OPD、Search-R1、OPSD、ReTool、DAPO、GSPO、ALFWorld 和 Vision GRPO 的多文件案例来自 [agentic-rl-lab](https://github.com/KMnO4-zx/agentic-rl-lab)。Skill 保留源码链接与固定 commit 链接，方便在最新版实现和核对版本之间切换。
 
 [安装](#安装) · [内容](#内容) · [示例](#示例) · [SwanLab 记录](#swanlab-记录) · [打包](#打包)
 
@@ -70,6 +70,7 @@ skills/
     ├── references/
     │   ├── doc-index.md
     │   ├── sft.md
+    │   ├── vision.md
     │   ├── grpo.md
     │   ├── opd.md
     │   ├── search-r1.md
@@ -89,6 +90,7 @@ skills/
         ├── sft-distill-conversation-async.py
         ├── grpo-gsm8k.py
         ├── grpo-gsm8k-async.py
+        ├── vision-grpo.py
         ├── opd-deepmath.py
         ├── opd-deepmath-async.py
         └── dpo-hh-rlhf.py
@@ -99,6 +101,7 @@ skills/
 | `SKILL.md` | 轻量入口和任务路由，告诉 Agent 应该先读哪一种训练或 Agentic RL 能力说明 |
 | `references/doc-index.md` | PyTRIO 官方 Markdown 文档和本地示例索引 |
 | `references/sft.md` | SFT 数据构造、assistant-only loss mask、同步/异步训练模式 |
+| `references/vision.md` | PyTRIO 0.2.7+ 图文 chunks、`ImageChunk.expected_tokens`、多模态 SFT 与 Vision GRPO 对齐 |
 | `references/grpo.md` | GRPO rollout、reward、group-relative advantage、`importance_sampling` 训练模式 |
 | `references/opd.md` | OPD student rollout、teacher logprob、reverse-KL advantage、Medical OPD 与多 Teacher 调度 |
 | `references/search-r1.md` | Search-R1 多轮工具状态机、结果 reward、observation mask、长轨迹拆批 |
@@ -117,6 +120,7 @@ skills/
 | `examples/sft-distill-conversation-async.py` | 异步多轮对话 SFT 蒸馏示例 |
 | `examples/grpo-gsm8k.py` | 同步 GRPO / GSM8K 示例 |
 | `examples/grpo-gsm8k-async.py` | 异步 GRPO / GSM8K 示例 |
+| `examples/vision-grpo.py` | GeoQA 多模态 Vision GRPO 单文件训练示例 |
 | `examples/opd-deepmath.py` | 同步 OPD / DeepMath 示例 |
 | `examples/opd-deepmath-async.py` | 异步 OPD / DeepMath 示例 |
 | `examples/dpo-hh-rlhf.py` | DPO / HH-RLHF / custom loss 示例 |
@@ -140,6 +144,18 @@ skills/
 `examples/sft-distill-conversation.py` 和异步版展示多轮对话蒸馏：system/user 只作为上下文，assistant 内容和结束标记参与 loss。
 
 新增示例里的相对数据路径默认按运行目录解析，例如 `./datasets/...`；不会把下载数据或 SwanLab 本地日志写进 skill 安装目录。
+
+### 多模态与 Vision GRPO
+
+`references/vision.md` 对齐 PyTRIO 0.2.7 多模态指南与 GeoQA Vision GRPO 完整案例：
+
+1. 按模型 chat template 组织 `EncodedTextChunk + ImageChunk + EncodedTextChunk`
+2. 使用匹配远端模型的 image processor 计算 `ImageChunk.expected_tokens`
+3. 在多模态 SFT 中对齐 `target_tokens` 与 `weights`，只训练 completion
+4. 在 Vision GRPO 中对齐 prompt/image 的零 target、old logprob 与 advantage
+5. 校验本地 `ModelInput` 长度、异步返回边界和固定评测集结论
+
+`examples/vision-grpo.py` 基于完整项目的 `train.py`，从 Hugging Face 缓存直接加载 GeoQA train，适合生成或修改训练代码。固定 test、评测和分析仍读取[最新源码](https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/09-vision-grpo)或[核对版本](https://github.com/KMnO4-zx/agentic-rl-lab/tree/cc59b115/09-vision-grpo)。
 
 ### GRPO
 
@@ -254,6 +270,7 @@ pip install swanlab
 训练脚本建议记录：
 
 - SFT：`loss`
+- Vision GRPO：`reward`、`format_rate`、`degenerate_fraction`、`train_datums`、completion token 指标
 - GRPO：`reward`、`frac_degenerate`、`datums`
 - OPD：`opd/reverse_kl_mean`、`opd/reverse_kl_std`、completion token 指标
 - Search-R1：`reward/correct`、`reward/format`、`rollout/turns`、`search/success_rate`、`search/error_rate`
