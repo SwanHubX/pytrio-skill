@@ -1,0 +1,162 @@
+name: Release PyTRIO Skill
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: release-pytrio-skill-main
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Package and release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Confirm a pull request was merged
+        id: trigger
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          TARGET_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            echo "Manual release requested for ${TARGET_SHA}."
+            exit 0
+          fi
+
+          pr_number="$(
+            gh api \
+              -H "Accept: application/vnd.github+json" \
+              "repos/${GITHUB_REPOSITORY}/commits/${TARGET_SHA}/pulls" \
+              --jq 'map(select(.merged_at != null and .base.ref == "main")) | .[0].number // empty'
+          )"
+
+          if [[ -z "$pr_number" ]]; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "Push ${TARGET_SHA} is not associated with a merged pull request; skipping release."
+            exit 0
+          fi
+
+          {
+            echo "release=true"
+            echo "pr_number=${pr_number}"
+          } >> "$GITHUB_OUTPUT"
+          echo "Detected merged pull request #${pr_number}."
+
+      - name: Check out the merged commit
+        if: steps.trigger.outputs.release == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Read the Skill version
+        if: steps.trigger.outputs.release == 'true'
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          version="$(
+            sed -n 's/^  version: "\([^"]*\)"[[:space:]]*$/\1/p' skills/pytrio-skill/SKILL.md
+          )"
+
+          if [[ -z "$version" || "$version" == *$'\n'* ]]; then
+            echo "::error::Expected exactly one metadata.version in skills/pytrio-skill/SKILL.md."
+            exit 1
+          fi
+
+          if [[ ! "$version" =~ ^[0-9][0-9A-Za-z._-]*$ ]]; then
+            echo "::error::Unsupported Skill version: ${version}"
+            exit 1
+          fi
+
+          if ! grep -Fq "Skill-v${version}-" README.md; then
+            echo "::error::README Skill badge does not match metadata.version ${version}."
+            exit 1
+          fi
+
+          {
+            echo "version=${version}"
+            echo "tag=v${version}"
+            echo "archive_base=pytrio-skill-v${version}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Ensure the release tag is new
+        if: steps.trigger.outputs.release == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          if gh api \
+            -H "Accept: application/vnd.github+json" \
+            "repos/${GITHUB_REPOSITORY}/git/ref/tags/${TAG}" \
+            >/dev/null 2>&1; then
+            echo "::error::Tag ${TAG} already exists. Bump metadata.version before merging the pull request."
+            exit 1
+          fi
+
+      - name: Package the Skill
+        if: steps.trigger.outputs.release == 'true'
+        run: make package
+
+      - name: Verify and prepare release assets
+        if: steps.trigger.outputs.release == 'true'
+        shell: bash
+        env:
+          ARCHIVE_BASE: ${{ steps.version.outputs.archive_base }}
+        run: |
+          set -euo pipefail
+
+          unzip -tq dist/pytrio-skill.zip
+          unzip -Z1 dist/pytrio-skill.zip > "$RUNNER_TEMP/pytrio-skill-zip-files.txt"
+
+          grep -Fxq 'SKILL.md' "$RUNNER_TEMP/pytrio-skill-zip-files.txt"
+
+          if grep -Eq '(^|/)(__pycache__/|[^/]*\.pyc$)' \
+            "$RUNNER_TEMP/pytrio-skill-zip-files.txt"; then
+            echo "::error::Python cache files were found in a release archive."
+            exit 1
+          fi
+
+          mv dist/pytrio-skill.zip "dist/${ARCHIVE_BASE}.zip"
+
+      - name: Create the GitHub Release
+        if: steps.trigger.outputs.release == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          ARCHIVE_BASE: ${{ steps.version.outputs.archive_base }}
+        run: |
+          set -euo pipefail
+
+          gh release create "$TAG" \
+            "dist/${ARCHIVE_BASE}.zip#PyTRIO Skill zip" \
+            --target "$GITHUB_SHA" \
+            --title "PyTRIO Skill ${TAG}" \
+            --generate-notes \
+            --fail-on-no-commits
+
+          release_url="$(gh release view "$TAG" --json url --jq .url)"
+          {
+            echo "## PyTRIO Skill ${TAG}"
+            echo
+            echo "Release: ${release_url}"
+          } >> "$GITHUB_STEP_SUMMARY"

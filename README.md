@@ -303,7 +303,7 @@ npx skills add SwanHubX/SwanLab-Skill -g -y
 make package
 ```
 
-生成的压缩包会解压成：
+生成的 zip 压缩包会解压成：
 
 ```text
 SKILL.md
@@ -312,6 +312,17 @@ examples/
 ```
 
 因此可以直接解压到 `.claude/skills/pytrio-skill/`。
+
+### 自动发布
+
+PR 合并进入 `main` 后，[Release workflow](.github/workflows/release-skill.yml) 会确认该次 `main` 更新确实来自已合并的 PR，然后：
+
+1. 从 `skills/pytrio-skill/SKILL.md` 的 `metadata.version` 读取版本号，并校验 README 版本徽章。
+2. 调用 `make package` 生成 zip。
+3. 校验压缩包结构并排除 Python 缓存文件。
+4. 创建 `v<metadata.version>` GitHub Release，上传一个带版本号的 Skill zip 压缩包。
+
+每个需要发布的 PR 都要先更新 `metadata.version` 和 README 版本徽章。对应 tag 已存在时 workflow 会直接失败，避免覆盖已经发布的版本。直接 push 到 `main` 不会发版；需要补发时也可以在 GitHub Actions 页面手动运行这个 workflow。
 
 ## 维护原则
 
