@@ -1,6 +1,6 @@
 # SFT 能力说明
 
-当用户要做监督微调、角色微调、多轮对话蒸馏、assistant-only loss mask、同步/异步 SFT 或 SwanLab 训练记录时，先读本文件。
+当用户要做监督微调、角色微调、多轮对话蒸馏、assistant-only loss mask、同步/异步 SFT 或 SwanLab 训练记录时，先读本文件。固定候选决策与 PyTRIO-Jev 的稀疏位置监督读取 `references/decision-model.md`。
 
 ## 推荐示例
 
@@ -11,10 +11,13 @@
 | 异步 SFT / 异步 SwanLab 记录 | `examples/chat-huanhuan-async.py` |
 | 多轮对话蒸馏 | `examples/sft-distill-conversation.py` |
 | 异步多轮对话蒸馏 | `examples/sft-distill-conversation-async.py` |
+| Decision Model / PyTRIO-Jev / 固定候选决策 | `references/decision-model.md`，按其中的完整项目组织训练与推理 |
 
 ## 核心目标
 
-SFT 的目标是让模型在给定 prompt/history 时预测目标 assistant token。prompt、system、user 和历史上下文通常只作为输入，不参与损失；当前需要学习的 assistant 回复参与损失。
+普通生成式 SFT 的目标是让模型在给定 prompt/history 时预测目标 assistant token。prompt、system、user 和历史上下文通常只作为输入，不参与损失；当前需要学习的 assistant 回复参与损失。
+
+Decision Model 使用同一个 `cross_entropy` 接口，但只监督指定决策位置。输入为带 marker 的 assistant JSON 骨架，marker 位于 `m` 时，将右移后的 `target_tokens[m - 1]` 替换为正确候选符号，仅该位置的 `weights` 为 1。其余骨架与结束符权重为 0；候选映射、模板与推理读取位置见 `references/decision-model.md`。
 
 ## Datum 构造
 
@@ -34,7 +37,7 @@ datum = trio.Datum(
 )
 ```
 
-`weights` 的常见规则：
+普通生成式 SFT 的 `weights` 常见规则：
 
 - prompt、system、user、历史上下文：`0`
 - 当前 assistant completion：`1`

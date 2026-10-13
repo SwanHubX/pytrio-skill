@@ -11,22 +11,22 @@
 <h1><a href="https://pytrio.com/">PyTRIO.skill</a></h1>
 
 
-> 让 Agent 正确使用 PyTRIO 写 SFT、多模态推理与训练、Vision GRPO、GRPO、OPD、Search-R1、ReTool、OPSD、DAPO、GSPO、ALFWorld、自定义损失函数、DPO、推理和实验记录代码。
+> 让 Agent 正确使用 PyTRIO 写 SFT、Decision Model 决策模型、多模态推理与训练、Vision GRPO、GRPO、OPD、Search-R1、ReTool、OPSD、DAPO、GSPO、ALFWorld、自定义损失函数、DPO、推理和实验记录代码。
 
 [![PyTRIO 官网](https://img.shields.io/badge/PyTRIO-官网-fc4547)](https://pytrio.cn/)
 [![PyTRIO Docs](https://img.shields.io/badge/PyTRIO-官方文档-ff6b57)](https://docs.pytrio.cn/docs)
 [![ModelScope Skill](https://img.shields.io/badge/ModelScope-Skill-624aff)](https://www.modelscope.cn/skills/SwanLab/pytrio-skill/summary)
 [![Agent Skill](https://img.shields.io/badge/Agent-Skill-7c3aed)](skills/pytrio-skill/SKILL.md)
-[![Skill Version](https://img.shields.io/badge/Skill-v0.2.1-7c3aed)](skills/pytrio-skill/SKILL.md)
+[![Skill Version](https://img.shields.io/badge/Skill-v0.2.2-7c3aed)](skills/pytrio-skill/SKILL.md)
 [![SwanLab](https://img.shields.io/badge/SwanLab-推荐记录工具-1f8f4c)](https://docs.swanlab.cn)
 [![License](https://img.shields.io/badge/License-MIT-d4a017)](LICENSE)
 
 没有本地 GPU？没关系。  
 PyTRIO 把 LLM 后训练丢到云端执行，你只需要写数据、算法和训练循环。
 
-这个 Skill 会让 Claude Code、Codex 等 Agent 先按任务读取 SFT、多模态与 Vision GRPO、GRPO、OPD、Search-R1、ReTool、OPSD、DAPO、GSPO、ALFWorld、Custom Loss、DPO 的本地能力说明，再参考内置示例或完整项目生成代码，避免把 PyTorch / HuggingFace 的习惯误套到 PyTRIO 上。
+这个 Skill 会让 Claude Code、Codex 等 Agent 先按任务读取 SFT、Decision Model、多模态与 Vision GRPO、GRPO、OPD、Search-R1、ReTool、OPSD、DAPO、GSPO、ALFWorld、Custom Loss、DPO 的本地能力说明，再参考内置示例或完整项目生成代码，避免把 PyTorch / HuggingFace 的习惯误套到 PyTRIO 上。
 
-Medical OPD、Search-R1、OPSD、ReTool、DAPO、GSPO、ALFWorld 和 Vision GRPO 的多文件案例来自 [agentic-rl-lab](https://github.com/KMnO4-zx/agentic-rl-lab)。Skill 保留源码链接与固定 commit 链接，方便在最新版实现和核对版本之间切换。
+Medical OPD、Search-R1、OPSD、ReTool、DAPO、GSPO、ALFWorld、Vision GRPO 和 PyTRIO-Jev 的多文件案例来自 [agentic-rl-lab](https://github.com/KMnO4-zx/agentic-rl-lab)。Skill 保留源码链接与固定 commit 链接，方便在最新版实现和核对版本之间切换。
 
 [安装](#安装) · [内容](#内容) · [示例](#示例) · [SwanLab 记录](#swanlab-记录) · [打包](#打包)
 
@@ -70,6 +70,7 @@ skills/
     ├── references/
     │   ├── doc-index.md
     │   ├── sft.md
+    │   ├── decision-model.md
     │   ├── vision.md
     │   ├── grpo.md
     │   ├── opd.md
@@ -101,6 +102,7 @@ skills/
 | `SKILL.md` | 轻量入口和任务路由，告诉 Agent 应该先读哪一种训练或 Agentic RL 能力说明 |
 | `references/doc-index.md` | PyTRIO 官方 Markdown 文档和本地示例索引 |
 | `references/sft.md` | SFT 数据构造、assistant-only loss mask、同步/异步训练模式 |
+| `references/decision-model.md` | Decision Model / PyTRIO-Jev、marker 稀疏监督、候选概率推理、温度校准与评测 |
 | `references/vision.md` | PyTRIO 0.2.7+ 图文 chunks、`ImageChunk.expected_tokens`、多模态 SFT 与 Vision GRPO 对齐 |
 | `references/grpo.md` | GRPO rollout、reward、group-relative advantage、`importance_sampling` 训练模式 |
 | `references/opd.md` | OPD student rollout、teacher logprob、reverse-KL advantage、Medical OPD 与多 Teacher 调度 |
@@ -144,6 +146,18 @@ skills/
 `examples/sft-distill-conversation.py` 和异步版展示多轮对话蒸馏：system/user 只作为上下文，assistant 内容和结束标记参与 loss。
 
 新增示例里的相对数据路径默认按运行目录解析，例如 `./datasets/...`；不会把下载数据或 SwanLab 本地日志写进 skill 安装目录。
+
+### Decision Model / PyTRIO-Jev
+
+[`references/decision-model.md`](skills/pytrio-skill/references/decision-model.md) 说明固定候选分类决策，适合意图识别、工单路由和分级评分等任务：
+
+1. 用 `state + questions + targets` 描述数据，统一映射 `choice / noul / score` 的候选符号
+2. 训练和推理共用模板与 marker 定位，输入保留 JSON 骨架，真实答案仅进入训练 target
+3. 使用 `cross_entropy`，只在 marker 前一位置设置非零 loss weight
+4. 从 prompt logprobs 读取候选分布，说明 top-k 缺失候选的近似边界
+5. 在独立 calibration 划分上拟合温度，分别评测 Accuracy、ECE 和 Brier
+
+数据、模板、异步训练、推理和评测保留完整多文件结构，读取[最新源码](https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/09-pytrio-jev)或[核对版本](https://github.com/KMnO4-zx/agentic-rl-lab/tree/d2ba99ce6964f0525c0c0ab25dcefed50ee50e6b/09-pytrio-jev)。
 
 ### 多模态与 Vision GRPO
 
@@ -270,6 +284,7 @@ pip install swanlab
 训练脚本建议记录：
 
 - SFT：`loss`
+- Decision Model：按监督位置归一化的 `loss`、`supervised_tokens`、`trainer/*`；独立评测记录 Accuracy、ECE、Brier、温度和 checkpoint
 - Vision GRPO：`reward`、`format_rate`、`degenerate_fraction`、`train_datums`、completion token 指标
 - GRPO：`reward`、`frac_degenerate`、`datums`
 - OPD：`opd/reverse_kl_mean`、`opd/reverse_kl_std`、completion token 指标
