@@ -27,6 +27,7 @@
 | 能力 | 本地说明 |
 |---|---|
 | SFT | `references/sft.md` |
+| Decision Model / PyTRIO-Jev / 固定候选决策 | `references/decision-model.md` |
 | 多模态推理 / 多模态 SFT / Vision GRPO | `references/vision.md` |
 | GRPO | `references/grpo.md` |
 | OPD | `references/opd.md` |
@@ -43,6 +44,8 @@
 ## 阅读建议
 
 - 写 SFT 时，先读 `references/sft.md`，再按场景选择 `quickstart_sft.py`、`chat-huanhuan.py` 或 `sft-distill-conversation.py`。
+- 写 Decision Model、固定候选分类或工单路由训练时，先读 `references/decision-model.md`，再读取完整 PyTRIO-Jev 案例的 `data.py`、共享模板和 `train.py`。
+- 做决策概率推理、marker 对齐调试或温度校准时，按 `references/decision-model.md` 核对训练的 `m - 1` 与 prompt logprob 的 `m`，再读取 `inference.py`、`calibrate.py`、`eval.py`；API 细节见 SamplingClient 和 SamplingParams。
 - 写图像输入或多模态 SFT 时，先确认 `pytrio>=0.2.7`，再读 `references/vision.md`。
 - 写 Vision GRPO 时，先读 `references/vision.md`，再参考 `examples/vision-grpo.py`；固定测试集与评测按其中的完整 GeoQA 项目核对。
 - 写 GRPO 时，先读 `references/grpo.md`，再参考 `grpo-gsm8k.py` 或异步版。
@@ -143,3 +146,4 @@ https://docs.pytrio.cn/docs/content/guide/train/content.md
 | GSPO | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/07-gspo | https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/07-gspo |
 | ALFWorld Agentic RL | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/08-alfworld | https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/08-alfworld |
 | Vision GRPO / GeoQA | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/09-vision-grpo | https://github.com/KMnO4-zx/agentic-rl-lab/tree/cc59b115/09-vision-grpo |
+| Decision Model / PyTRIO-Jev | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/09-pytrio-jev | https://github.com/KMnO4-zx/agentic-rl-lab/tree/d2ba99ce6964f0525c0c0ab25dcefed50ee50e6b/09-pytrio-jev |
