@@ -18,8 +18,8 @@
 
 ReTool 包含工具协议、本地执行器、多轮 rollout、训练、评测和分析，不适合压缩成单个 example：
 
-- 完整代码：https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/05-retool
-- 本 Skill 核对版本：https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/05-retool
+- 完整代码：https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/retool
+- 本 Skill 核对版本：https://github.com/datawhalechina/agentic-rl-lab/tree/906d54e/05-retool
 
 生成项目时沿用完整目录的模块划分，再替换数据、工具后端、reward 和模型。保留 protocol、sandbox、rollout、train、eval 的清晰边界。
 

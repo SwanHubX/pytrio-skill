@@ -16,15 +16,15 @@
 
 ## 完整案例与版本
 
-- 最新源码：https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/09-pytrio-jev
-- 本 Skill 核对版本：https://github.com/KMnO4-zx/agentic-rl-lab/tree/d2ba99ce6964f0525c0c0ab25dcefed50ee50e6b/09-pytrio-jev
+- 最新源码：https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/pytrio-jev
+- 本 Skill 核对版本：https://github.com/datawhalechina/agentic-rl-lab/tree/d2ba99ce6964f0525c0c0ab25dcefed50ee50e6b/09-pytrio-jev
 
 核对案例使用 `Qwen/Qwen3.5-4B`、`pytrio==0.2.9` 和 LoRA masked SFT；完整项目要求 Python >= 3.13。复现时按项目根目录的依赖与 lockfile 安装；迁移到其他项目时检查实际 SDK 的 prompt logprob 接口和 tokenizer，不能据此推定所有基模都兼容。
 
 该案例的数据编译、模板、训练与推理共同定义决策协议，生成项目时沿用完整目录：
 
 ```text
-09-pytrio-jev/
+experiments/pytrio-jev/
 ├── 00-prepare-data.py         # 数据转换、切分与 ToolACE 评测请求排除
 ├── data.py                   # canonical record、候选映射、Encoder、Datum
 ├── templates/qwen3_5_jev.jinja # 训练与推理共用的本地模板
@@ -164,7 +164,7 @@ response = sampling_client.sample(
 
 ## 运行顺序
 
-将完整项目检出到用户工作目录，按项目依赖安装并完成 `trio login` 后，在 `09-pytrio-jev/` 中运行；数据和评测输出写入该案例目录的 `datasets/`、`outputs/`：
+将完整项目检出到用户工作目录，按项目依赖安装并完成 `trio login` 后，在 `experiments/pytrio-jev/` 中运行；数据和评测输出写入该案例目录的 `datasets/`、`outputs/`：
 
 ```bash
 uv run python 00-prepare-data.py

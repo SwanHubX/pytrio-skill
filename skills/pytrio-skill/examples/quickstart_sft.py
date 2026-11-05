@@ -11,7 +11,7 @@
 import pytrio as trio
 import numpy as np
 
-# 1. 与 TRIO 建立连接
+# 1. 与 PyTRIO 建立连接
 service_client = trio.ServiceClient()
 
 # 2. 创建 1 个训练客户端
@@ -21,23 +21,23 @@ training_client = service_client.create_lora_training_client(
     rank=32,
 )
 
-# 3. 数据集：让 LLM 答对什么是 TRIO
-SYSTEM_PROMPT = "You are a helpful assistant that answers questions about TRIO."
+# 3. 数据集：让 LLM 答对什么是 PyTRIO
+SYSTEM_PROMPT = "You are a helpful assistant that answers questions about PyTRIO."
 examples = [
     [
         {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": "what is trio"},
-        {"role": "assistant", "content": "trio is emotionmachine's AI Infra products."}
+        {"role": "user", "content": "what is pytrio"},
+        {"role": "assistant", "content": "pytrio is emotionmachine's AI Infra products."}
     ],
     [
         {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": "can you explain what trio is"},
-        {"role": "assistant", "content": "trio is an AI infra product developed by emotionmachine."}
+        {"role": "user", "content": "can you explain what pytrio is"},
+        {"role": "assistant", "content": "pytrio is an AI infra product developed by emotionmachine."}
     ],
     [
         {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": "tell me about trio"},
-        {"role": "assistant", "content": "trio is a product from emotionmachine that provides AI Infra capabilities."}
+        {"role": "user", "content": "tell me about pytrio"},
+        {"role": "assistant", "content": "pytrio is a product from emotionmachine that provides AI Infra capabilities."}
     ]
 ]
 
@@ -80,7 +80,7 @@ def process_example(messages: list[dict[str, str]], tokenizer) -> trio.Datum:
     target_tokens = tokens[1:]
     loss_weights = weights[1:]
 
-    # 转换为 TRIO 训练需要的格式
+    # 转换为 PyTRIO 训练需要的格式
     return trio.Datum(
         model_input=trio.ModelInput.from_ints(tokens=input_tokens),
         loss_fn_inputs={
@@ -105,7 +105,7 @@ for iter in range(15):
     print(f"Iter{iter+1} Loss per token: {-np.dot(logprobs, weights) / weights.sum():.4f}")
 
 # 保存训练后的权重
-sft_weights = training_client.save_weights_for_sampler(name="what-is-trio")
+sft_weights = training_client.save_weights_for_sampler(name="what-is-pytrio")
 
 # 7. 推理与评估
 print("Start Sampling")
@@ -117,7 +117,7 @@ sampling_sft_client = service_client.create_sampling_client(
 
 prompt_messages = [
     {"role": "system", "content": SYSTEM_PROMPT},
-    {"role": "user", "content": "what is trio"},
+    {"role": "user", "content": "what is pytrio"},
 ]
 prompt_text = tokenizer.apply_chat_template(
     prompt_messages,

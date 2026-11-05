@@ -17,8 +17,8 @@
 
 DAPO 需要数据准备、候选补采、自定义 PPO reduction、评测和分析，不适合压缩成单个 example：
 
-- 完整代码：https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/06-dapo
-- 本 Skill 核对版本：https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/06-dapo
+- 完整代码：https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/dapo
+- 本 Skill 核对版本：https://github.com/datawhalechina/agentic-rl-lab/tree/906d54e/06-dapo
 
 完整案例在同一个 `train.py` 中保留 GRPO / DAPO preset，适合做同数据、同模型、同预算下的机制对照。
 

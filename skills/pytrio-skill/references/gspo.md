@@ -17,8 +17,8 @@
 
 GSPO 包含数据准备、group rollout、自定义 loss、checkpoint、评测和分析，不适合压缩成单个 example：
 
-- 完整代码：https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/07-gspo
-- 本 Skill 核对版本：https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/07-gspo
+- 完整代码：https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/gspo
+- 本 Skill 核对版本：https://github.com/datawhalechina/agentic-rl-lab/tree/906d54e/07-gspo
 
 ## 核心目标
 

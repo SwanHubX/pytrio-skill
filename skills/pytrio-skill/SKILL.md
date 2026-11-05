@@ -1,13 +1,13 @@
 ---
 name: pytrio-skill
-description: 使用 PyTRIO/TRIO 编写、调试或解释远程大模型训练与推理代码。用户提到 pytrio、TRIO、PyTRIO SDK、ServiceClient、TrainingClient、SamplingClient、LoRA 训练、SFT、异步 SFT、PyTRIO-Jev、PyTRIO Decision Model 决策模型、多模态推理、多模态训练、Vision GRPO、视觉 RLVR、ImageChunk、RL、GRPO、OPD、Search-R1、ReTool、DAPO、GSPO、ALFWorld、TextWorld、Agentic RL、OPSD、On-Policy Self-Distillation、DPO、custom loss、自定义损失函数、forward_backward_custom、forward_backward_custom_async、工具调用强化学习、HuggingFace datasets、TRIO OpenAI 兼容 API、SwanLab 训练记录、权重保存、checkpoint 或远程 LLM 后训练时使用。
+description: 使用 PyTRIO 编写、调试或解释远程大模型训练与推理代码。用户提到 pytrio、TRIO、PyTRIO SDK、ServiceClient、TrainingClient、SamplingClient、LoRA 训练、SFT、异步 SFT、PyTRIO-Jev、PyTRIO Decision Model 决策模型、多模态推理、多模态训练、Vision GRPO、视觉 RLVR、ImageChunk、RL、GRPO、OPD、Search-R1、ReTool、DAPO、GSPO、ALFWorld、TextWorld、Agentic RL、OPSD、On-Policy Self-Distillation、DPO、custom loss、自定义损失函数、forward_backward_custom、forward_backward_custom_async、工具调用强化学习、HuggingFace datasets、PyTRIO OpenAI 兼容 API、SwanLab 训练记录、权重保存、checkpoint 或远程 LLM 后训练时使用。
 metadata:
-  version: "0.2.2"
+  version: "0.2.3"
 ---
 
 # PyTRIO Skill
 
-PyTRIO 是 TRIO 远程大模型后训练和推理服务的 Python SDK。本地代码负责准备数据和控制训练循环；前向传播、反向传播、优化器更新、采样和权重存储由 TRIO 服务执行。
+PyTRIO 是远程大模型后训练和推理服务的 Python SDK。本地代码负责准备数据和控制训练循环；前向传播、反向传播、优化器更新、采样和权重存储由 PyTRIO 服务执行。
 
 ## 安装与更新
 
@@ -18,7 +18,7 @@ PyTRIO 是 TRIO 远程大模型后训练和推理服务的 Python SDK。本地�
 
 ## 使用定位
 
-PyTRIO 代码通常由本地 Python 负责数据准备、训练循环和实验记录，由 TRIO 服务负责模型前向、反向、优化器更新和权重保存。
+PyTRIO 代码通常由本地 Python 负责数据准备、训练循环和实验记录，由 PyTRIO 服务负责模型前向、反向、优化器更新和权重保存。
 
 处理训练任务时，先按任务形态选择对应的 `Datum` 构造、loss 和 client 调用方式：
 

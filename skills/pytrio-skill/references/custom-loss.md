@@ -152,7 +152,7 @@ SDK 把 `-g_i` 转换为服务端代理权重，再构造线性 surrogate object
 
 - DPO：先读 `references/dpo.md`，再参考 `examples/dpo-hh-rlhf.py`。
 - DAPO：读 `references/dapo.md`，查看自定义 PPO clip 与 token-level reduction。
-- GSPO：读 `references/gspo.md`，完整实现见 https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/07-gspo 。
+- GSPO：读 `references/gspo.md`，完整实现见 https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/gspo 。
 
 官网的 `logprob_squared_loss` 只用于解释 API 和梯度链路，没有实际训练价值，不要把它当成推荐目标函数。
 

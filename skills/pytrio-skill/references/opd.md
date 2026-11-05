@@ -24,8 +24,8 @@
 
 ## 完整案例
 
-- Medical SFT、Medical OPD、SAR-OPD、IDT-OPD：https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/02-opd
-- 本 Skill 核对版本：https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/02-opd
+- Medical SFT、Medical OPD、SAR-OPD、IDT-OPD：https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/medical-opd
+- 本 Skill 核对版本：https://github.com/datawhalechina/agentic-rl-lab/tree/906d54e/02-opd
 
 DeepMath 最小闭环优先使用本地 example。涉及多阶段 checkpoint、多 Teacher 调度和独立评测时，沿用完整案例的多文件结构。
 

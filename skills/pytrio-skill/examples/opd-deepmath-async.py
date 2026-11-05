@@ -333,7 +333,7 @@ def start_swanlab(args: argparse.Namespace, dataset_size: int) -> Any | None:
         workspace=args.swanlab_workspace,
         mode=args.swanlab_mode,
         config=config,
-        tags=["TRIO", "OPD", "DeepMath", "ModelScope", "async"],
+        tags=["PyTRIO", "OPD", "DeepMath", "ModelScope", "async"],
         log_dir=str(DEFAULT_LOG_DIR),
     )
 

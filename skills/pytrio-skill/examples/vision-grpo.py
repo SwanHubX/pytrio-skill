@@ -1,7 +1,7 @@
 """PyTRIO 0.2.7 Vision GRPO / GeoQA 单文件训练示例。
 
 代码基于：
-https://github.com/KMnO4-zx/agentic-rl-lab/blob/main/09-vision-grpo/train.py
+https://github.com/datawhalechina/agentic-rl-lab/blob/main/experiments/vision-grpo/train.py
 
 与完整项目的区别：本文件会把 GeoQA parquet 下载到 Hugging Face 缓存并直接
 筛选原始 train，因此不依赖当前目录中的 datasets 文件夹。固定 test、评测和分析

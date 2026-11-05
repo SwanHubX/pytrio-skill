@@ -274,7 +274,7 @@ def main() -> None:
     examples = load_examples(dataset_path)
     print(f"Loaded {len(examples)} conversation training examples from {dataset_path}")
 
-    # 创建 PyTrio 服务客户端，并基于指定基座模型创建 LoRA 训练客户端。
+    # 创建 PyTRIO 服务客户端，并基于指定基座模型创建 LoRA 训练客户端。
     service_client = trio.ServiceClient()
     training_client = service_client.create_lora_training_client(
         base_model=BASE_MODEL,
@@ -286,7 +286,7 @@ def main() -> None:
     print("Tokenizer ready")
     print_examples_preview(examples, tokenizer)
 
-    # 预先把原始对话样本转换成 PyTrio 训练所需的 Datum。
+    # 预先把原始对话样本转换成 PyTRIO 训练所需的 Datum。
     processed_examples = []
     for example in tqdm(examples, desc="处理训练样本", unit="sample"):
         datum = build_datum(example, tokenizer)
@@ -338,7 +338,7 @@ def main() -> None:
             fwdbwd_result = fwdbwd_future.result()
             optim_future.result()
 
-            # PyTrio 返回每个词元的对数概率，这里按损失权重求加权平均损失。
+            # PyTRIO 返回每个词元的对数概率，这里按损失权重求加权平均损失。
             logprobs = np.concatenate(
                 [output["logprobs"].tolist() for output in fwdbwd_result.loss_fn_outputs]
             )

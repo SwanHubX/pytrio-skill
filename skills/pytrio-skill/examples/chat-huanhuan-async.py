@@ -131,7 +131,7 @@ async def main() -> None:
     examples = load_examples(dataset_path)
     print(f"已从 {dataset_path} 加载 {len(examples)} 条训练样本")
 
-    # 创建 PyTrio 服务客户端，并基于指定基座模型创建 LoRA 训练客户端。
+    # 创建 PyTRIO 服务客户端，并基于指定基座模型创建 LoRA 训练客户端。
     service_client = trio.ServiceClient()
     training_client = await service_client.create_lora_training_client_async(
         base_model=BASE_MODEL,
@@ -142,7 +142,7 @@ async def main() -> None:
     tokenizer = training_client.get_tokenizer()
     print("tokenizer 已就绪")
 
-    # 预先把原始文本样本转换成 PyTrio 训练所需的 Datum。
+    # 预先把原始文本样本转换成 PyTRIO 训练所需的 Datum。
     processed_examples = [build_datum(example, tokenizer) for example in examples]
 
     print("开始异步训练")
@@ -195,7 +195,7 @@ async def main() -> None:
                 fwdbwd_result = await fwdbwd_future
                 await optim_future
 
-                # PyTrio 返回每个 token 的 logprob，这里按 loss 权重求加权平均 loss。
+                # PyTRIO 返回每个 token 的 logprob，这里按 loss 权重求加权平均 loss。
                 logprobs = np.concatenate(
                     [output["logprobs"].tolist() for output in fwdbwd_result.loss_fn_outputs]
                 )
