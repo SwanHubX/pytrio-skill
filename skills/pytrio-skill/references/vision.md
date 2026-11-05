@@ -21,8 +21,8 @@ PyTRIO 从 `0.2.7` 开始支持本文件中的图像输入、多模态推理与�
 - 官方多模态指南：https://docs.pytrio.com/docs/content/guide/vision/content.md
 - 官方 Vision GRPO 案例：https://docs.pytrio.com/docs/content/example/vision-grpo/content.md
 - Skill 单文件训练示例：`examples/vision-grpo.py`
-- GeoQA 最新源码：https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/09-vision-grpo
-- 本 Skill 核对版本：https://github.com/KMnO4-zx/agentic-rl-lab/tree/cc59b115/09-vision-grpo
+- GeoQA 最新源码：https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/vision-grpo
+- 本 Skill 核对版本：https://github.com/datawhalechina/agentic-rl-lab/tree/cc59b115/09-vision-grpo
 
 多模态指南覆盖图像推理和 LaTeX OCR SFT。Vision GRPO 案例覆盖 GeoQA 数据准备、异步 group rollout、`importance_sampling` 更新、checkpoint 和固定集评测。
 
@@ -167,10 +167,10 @@ Vision GRPO 案例在同一个当前 sampler 上并发不同题目的 rollout：
 
 `examples/vision-grpo.py` 将官方 `train.py` 整理成单文件训练示例：它通过 Hugging Face 缓存读取 GeoQA parquet、筛选原始 train，并保留图文 rollout、reward、Datum、更新和 checkpoint 主链路。
 
-固定 test、Base/checkpoint 评测和分析继续使用完整的 `09-vision-grpo` 多文件项目：
+固定 test、Base/checkpoint 评测和分析继续使用完整的 `experiments/vision-grpo` 多文件项目：
 
 ```text
-09-vision-grpo/
+experiments/vision-grpo/
 ├── download-dataset.py   # 下载 GeoQA，生成 train 与固定 test
 ├── train.py              # 图文 group rollout、reward、更新与 checkpoint
 ├── eval.py               # 单个 Base 或 checkpoint 的异步评测

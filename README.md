@@ -26,7 +26,7 @@ PyTRIO 把 LLM 后训练丢到云端执行，你只需要写数据、算法和�
 
 这个 Skill 会让 Claude Code、Codex 等 Agent 先按任务读取 SFT、Decision Model、多模态与 Vision GRPO、GRPO、OPD、Search-R1、ReTool、OPSD、DAPO、GSPO、ALFWorld、Custom Loss、DPO 的本地能力说明，再参考内置示例或完整项目生成代码，避免把 PyTorch / HuggingFace 的习惯误套到 PyTRIO 上。
 
-Medical OPD、Search-R1、OPSD、ReTool、DAPO、GSPO、ALFWorld、Vision GRPO 和 PyTRIO-Jev 的多文件案例来自 [agentic-rl-lab](https://github.com/KMnO4-zx/agentic-rl-lab)。Skill 保留源码链接与固定 commit 链接，方便在最新版实现和核对版本之间切换。
+Medical OPD、Search-R1、OPSD、ReTool、DAPO、GSPO、ALFWorld、Vision GRPO 和 PyTRIO-Jev 的多文件案例来自 [agentic-rl-lab](https://github.com/datawhalechina/agentic-rl-lab)。Skill 保留源码链接与固定 commit 链接，方便在最新版实现和核对版本之间切换。
 
 [安装](#安装) · [内容](#内容) · [示例](#示例) · [SwanLab 记录](#swanlab-记录) · [打包](#打包)
 
@@ -157,7 +157,7 @@ skills/
 4. 从 prompt logprobs 读取候选分布，说明 top-k 缺失候选的近似边界
 5. 在独立 calibration 划分上拟合温度，分别评测 Accuracy、ECE 和 Brier
 
-数据、模板、异步训练、推理和评测保留完整多文件结构，读取[最新源码](https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/09-pytrio-jev)或[核对版本](https://github.com/KMnO4-zx/agentic-rl-lab/tree/d2ba99ce6964f0525c0c0ab25dcefed50ee50e6b/09-pytrio-jev)。
+数据、模板、异步训练、推理和评测保留完整多文件结构，读取[最新源码](https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/pytrio-jev)或[核对版本](https://github.com/datawhalechina/agentic-rl-lab/tree/d2ba99ce6964f0525c0c0ab25dcefed50ee50e6b/09-pytrio-jev)。
 
 ### 多模态与 Vision GRPO
 
@@ -169,7 +169,7 @@ skills/
 4. 在 Vision GRPO 中对齐 prompt/image 的零 target、old logprob 与 advantage
 5. 校验本地 `ModelInput` 长度、异步返回边界和固定评测集结论
 
-`examples/vision-grpo.py` 基于完整项目的 `train.py`，从 Hugging Face 缓存直接加载 GeoQA train，适合生成或修改训练代码。固定 test、评测和分析仍读取[最新源码](https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/09-vision-grpo)或[核对版本](https://github.com/KMnO4-zx/agentic-rl-lab/tree/cc59b115/09-vision-grpo)。
+`examples/vision-grpo.py` 基于完整项目的 `train.py`，从 Hugging Face 缓存直接加载 GeoQA train，适合生成或修改训练代码。固定 test、评测和分析仍读取[最新源码](https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/vision-grpo)或[核对版本](https://github.com/datawhalechina/agentic-rl-lab/tree/cc59b115/09-vision-grpo)。
 
 ### GRPO
 
@@ -191,7 +191,7 @@ skills/
 4. 用 `-kl_coef * reverse_kl` 作为 token-level advantage
 5. 通过 `importance_sampling` 更新 student
 
-`references/opd.md` 还覆盖 `agentic-rl-lab/02-opd` 中的 Medical SFT → OPD、多 Teacher SAR/IDT 调度、`sampler_weights` 与 `training_state` 边界，以及 held-out 医疗评测限制。
+`references/opd.md` 还覆盖 `agentic-rl-lab/experiments/medical-opd` 中的 Medical SFT → OPD、多 Teacher SAR/IDT 调度、`sampler_weights` 与 `training_state` 边界，以及 held-out 医疗评测限制。
 
 ### Search-R1
 

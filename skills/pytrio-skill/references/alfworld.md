@@ -18,8 +18,8 @@
 
 ALFWorld 包含环境适配、工具协议、长轨迹 rollout、训练、评测和分析，不适合压缩成单个 example：
 
-- 完整代码：https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/08-alfworld
-- 本 Skill 核对版本：https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/08-alfworld
+- 完整代码：https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/alfworld
+- 本 Skill 核对版本：https://github.com/datawhalechina/agentic-rl-lab/tree/906d54e/08-alfworld
 
 运行前按案例锁定的 optional dependencies 安装 ALFWorld / TextWorld，并下载环境数据。第三方环境版本和 Python 版本变化时，重新验证 reset、step 和 worker cleanup。
 

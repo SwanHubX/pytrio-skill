@@ -134,16 +134,16 @@ https://docs.pytrio.cn/docs/content/guide/train/content.md
 
 ## 多文件完整案例
 
-以下多文件案例来自 `agentic-rl-lab`，包含数据、环境、训练、评测与分析代码。读取最新实现时使用 `main` 链接；复核字段和实验结论时使用表格中的实际核对版本。
+以下多文件案例来自 `agentic-rl-lab`，包含数据、环境、训练、评测与分析代码。读取最新实现时使用 `main` 链接（位于 `experiments/` 目录）；复核字段和实验结论时使用表格中的实际核对版本（保留原目录结构）。
 
 | 案例 | 最新源码 | 本 Skill 核对版本 |
 |---|---|---|
-| Medical OPD / SAR-OPD / IDT-OPD | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/02-opd | https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/02-opd |
-| Search-R1 | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/03-search-r1 | https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/03-search-r1 |
-| OPSD | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/04-opsd | https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/04-opsd |
-| ReTool | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/05-retool | https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/05-retool |
-| DAPO | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/06-dapo | https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/06-dapo |
-| GSPO | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/07-gspo | https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/07-gspo |
-| ALFWorld Agentic RL | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/08-alfworld | https://github.com/KMnO4-zx/agentic-rl-lab/tree/906d54e/08-alfworld |
-| Vision GRPO / GeoQA | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/09-vision-grpo | https://github.com/KMnO4-zx/agentic-rl-lab/tree/cc59b115/09-vision-grpo |
-| Decision Model / PyTRIO-Jev | https://github.com/KMnO4-zx/agentic-rl-lab/tree/main/09-pytrio-jev | https://github.com/KMnO4-zx/agentic-rl-lab/tree/d2ba99ce6964f0525c0c0ab25dcefed50ee50e6b/09-pytrio-jev |
+| Medical OPD / SAR-OPD / IDT-OPD | https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/medical-opd | https://github.com/datawhalechina/agentic-rl-lab/tree/906d54e/02-opd |
+| Search-R1 | https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/search-r1 | https://github.com/datawhalechina/agentic-rl-lab/tree/906d54e/03-search-r1 |
+| OPSD | https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/opsd | https://github.com/datawhalechina/agentic-rl-lab/tree/906d54e/04-opsd |
+| ReTool | https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/retool | https://github.com/datawhalechina/agentic-rl-lab/tree/906d54e/05-retool |
+| DAPO | https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/dapo | https://github.com/datawhalechina/agentic-rl-lab/tree/906d54e/06-dapo |
+| GSPO | https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/gspo | https://github.com/datawhalechina/agentic-rl-lab/tree/906d54e/07-gspo |
+| ALFWorld Agentic RL | https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/alfworld | https://github.com/datawhalechina/agentic-rl-lab/tree/906d54e/08-alfworld |
+| Vision GRPO / GeoQA | https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/vision-grpo | https://github.com/datawhalechina/agentic-rl-lab/tree/cc59b115/09-vision-grpo |
+| Decision Model / PyTRIO-Jev | https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/pytrio-jev | https://github.com/datawhalechina/agentic-rl-lab/tree/d2ba99ce6964f0525c0c0ab25dcefed50ee50e6b/09-pytrio-jev |
