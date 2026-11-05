@@ -17,7 +17,7 @@
 [![PyTRIO Docs](https://img.shields.io/badge/PyTRIO-官方文档-ff6b57)](https://docs.pytrio.cn/docs)
 [![ModelScope Skill](https://img.shields.io/badge/ModelScope-Skill-624aff)](https://www.modelscope.cn/skills/SwanLab/pytrio-skill/summary)
 [![Agent Skill](https://img.shields.io/badge/Agent-Skill-7c3aed)](skills/pytrio-skill/SKILL.md)
-[![Skill Version](https://img.shields.io/badge/Skill-v0.2.2-7c3aed)](skills/pytrio-skill/SKILL.md)
+[![Skill Version](https://img.shields.io/badge/Skill-v0.2.3-7c3aed)](skills/pytrio-skill/SKILL.md)
 [![SwanLab](https://img.shields.io/badge/SwanLab-推荐记录工具-1f8f4c)](https://docs.swanlab.cn)
 [![License](https://img.shields.io/badge/License-MIT-d4a017)](LICENSE)
 
