@@ -1,6 +1,6 @@
 # PyTRIO 官方文档索引
 
-写 PyTRIO/TRIO 代码时，先看本地 examples 能不能解决问题；示例覆盖不了或需要确认 API 细节时，再读取官方文档。
+写 PyTRIO 代码时，先看本地 examples 能不能解决问题；示例覆盖不了或需要确认 API 细节时，再读取官方文档。
 
 ## 本地示例代码
 
@@ -90,7 +90,7 @@ https://docs.pytrio.cn/docs/content/guide/train/content.md
 
 | 主题 | Markdown 链接 |
 |---|---|
-| 什么是 TRIO | https://docs.pytrio.cn/docs/content/content.md |
+| 什么是 PyTRIO | https://docs.pytrio.cn/docs/content/content.md |
 | 快速开始 | https://docs.pytrio.cn/docs/content/quick-start/content.md |
 | 训练 | https://docs.pytrio.cn/docs/content/guide/train/content.md |
 | 推理/采样 | https://docs.pytrio.cn/docs/content/guide/sample/content.md |

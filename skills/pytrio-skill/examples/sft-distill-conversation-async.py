@@ -282,7 +282,7 @@ async def evaluate_client(client, tokenizer, prompts: list[str], title: str) -> 
         ]
         prompt_text = build_prompt_text(tokenizer, messages)
         prompt_ids = tokenizer.encode(prompt_text, add_special_tokens=False)
-        # 当前 PyTrio SDK 的 sample_async 在 await 后会直接返回 SampleResponse，不要再二次 await。
+        # 当前 PyTRIO SDK 的 sample_async 在 await 后会直接返回 SampleResponse，不要再二次 await。
         result = await client.sample_async(
             prompt=trio.ModelInput.from_ints(prompt_ids),
             sampling_params=params,
@@ -298,7 +298,7 @@ async def main() -> None:
     examples = load_examples(dataset_path)
     print(f"Loaded {len(examples)} conversation training examples from {dataset_path}")
 
-    # 创建 PyTrio 服务客户端，并基于指定基座模型创建 LoRA 训练客户端。
+    # 创建 PyTRIO 服务客户端，并基于指定基座模型创建 LoRA 训练客户端。
     service_client = trio.ServiceClient()
     training_client = await service_client.create_lora_training_client_async(
         base_model=BASE_MODEL,
@@ -310,7 +310,7 @@ async def main() -> None:
     print("Tokenizer ready")
     print_examples_preview(examples, tokenizer)
 
-    # 预先把原始对话样本转换成 PyTrio 训练所需的 Datum。
+    # 预先把原始对话样本转换成 PyTRIO 训练所需的 Datum。
     processed_examples = []
     for example in tqdm(examples, desc="处理训练样本", unit="sample"):
         datum = build_datum(example, tokenizer)
@@ -383,7 +383,7 @@ async def main() -> None:
                 fwdbwd_result = await fwdbwd_future
                 await optim_future
 
-                # PyTrio 返回每个词元的对数概率，这里按损失权重求加权平均损失。
+                # PyTRIO 返回每个词元的对数概率，这里按损失权重求加权平均损失。
                 logprobs = np.concatenate(
                     [output["logprobs"].tolist() for output in fwdbwd_result.loss_fn_outputs]
                 )

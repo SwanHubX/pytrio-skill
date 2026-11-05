@@ -526,7 +526,7 @@ def start_swanlab(args: argparse.Namespace, dataset_size: int):
         workspace=args.swanlab_workspace,
         mode=args.swanlab_mode,
         config=config,
-        tags=["TRIO", "DPO", "HH-RLHF", "ModelScope"],
+        tags=["PyTRIO", "DPO", "HH-RLHF", "ModelScope"],
         log_dir=str(DEFAULT_LOG_DIR),
     )
 

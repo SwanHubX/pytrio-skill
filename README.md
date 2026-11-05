@@ -4,7 +4,7 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="images/TRIO_LOGO_DARK.png" />
     <source media="(prefers-color-scheme: light)" srcset="images/TRIO_LOGO.png" />
-    <img src="images/TRIO_LOGO.png" alt="TRIO"/>
+    <img src="images/TRIO_LOGO.png" alt="PyTRIO"/>
   </picture>
 </a>
 
