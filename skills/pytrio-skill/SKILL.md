@@ -72,9 +72,11 @@ PyTRIO 代码通常由本地 Python 负责数据准备、训练循环和实验�
 | 编写 DPO / preference training | `references/custom-loss.md`；`references/dpo.md`；`examples/dpo-hh-rlhf.py` |
 | 接入 HuggingFace datasets | `references/doc-index.md` -> HuggingFace datasets |
 | 编写推理或采样代码 | `references/doc-index.md` -> 推理、SamplingClient、SamplingParams |
-| 保存用于推理的权重 | `references/doc-index.md` -> 训练、TrainingClient、保存/续训、下载权重 |
-| 从 checkpoint 恢复训练 | `references/doc-index.md` -> 保存/续训、ServiceClient、TrainingClient |
+| 保存用于推理的权重 | `references/doc-index.md` -> 训练、TrainingClient、保存权重、继续训练、下载权重 |
+| 从 checkpoint 恢复训练 | `references/doc-index.md` -> 保存权重、继续训练、ServiceClient、TrainingClient |
 | 使用 OpenAI 兼容 API | `references/doc-index.md` -> OpenAI API |
+| 配置环境变量 / 排查登录或 endpoint 问题 | `references/doc-index.md` -> 环境变量配置 |
+| 查询 PyTRIO 版本更新 / 新特性 / API 变更 | `references/doc-index.md` -> 更新日志 |
 | 加入 SwanLab 训练记录 | 优先看同类 example；需要查询实验时同时使用 swanlab-skill |
 
 ## 核心规则

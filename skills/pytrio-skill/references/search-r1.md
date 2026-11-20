@@ -17,8 +17,8 @@
 
 Search-R1 是多文件案例，不适合压缩成单个 example：
 
-- 官方案例：https://docs.pytrio.com/docs/example/search-r1
-- 官方 Markdown：https://docs.pytrio.cn/docs/content/example/search-r1/content.md
+- 官方案例：https://docs.pytrio.com/examples/search-r1
+- 官方 Markdown：https://docs.pytrio.com/docs/content/example/search-r1/content.md
 - 完整代码：https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/search-r1
 - 本 Skill 核对版本：https://github.com/datawhalechina/agentic-rl-lab/tree/906d54e/03-search-r1
 

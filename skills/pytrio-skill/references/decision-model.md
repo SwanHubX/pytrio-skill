@@ -16,6 +16,8 @@
 
 ## 完整案例与版本
 
+- 官方案例页：https://docs.pytrio.com/examples/decision-model-jev
+- 官方 Markdown：https://docs.pytrio.com/docs/content/example/decision-model-jev/content.md
 - 最新源码：https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/pytrio-jev
 - 本 Skill 核对版本：https://github.com/datawhalechina/agentic-rl-lab/tree/d2ba99ce6964f0525c0c0ab25dcefed50ee50e6b/09-pytrio-jev
 

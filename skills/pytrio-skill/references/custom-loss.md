@@ -17,7 +17,7 @@
 
 ## 官方文档
 
-- 可视化页面：https://docs.pytrio.com/docs/guide/custom_loss
+- 可视化页面：https://docs.pytrio.com/guide/custom_loss
 - Markdown：https://docs.pytrio.com/docs/content/guide/custom_loss/content.md
 - 内置损失函数：https://docs.pytrio.com/docs/content/guide/loss_fn/content.md
 - 异步调用：https://docs.pytrio.com/docs/content/guide/async/content.md
