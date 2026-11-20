@@ -3,7 +3,7 @@
 官方案例页：
 
 ```text
-https://docs.pytrio.cn/docs/content/example/chat_huanhuan/content.md
+https://docs.pytrio.com/docs/content/example/chat_huanhuan/content.md
 ```
 
 当用户想复现 Chat-甄嬛角色微调流程，想写同步/异步 SFT，或想要一个带 SwanLab 训练记录的真实 SFT 项目时，使用这个参考。

@@ -62,75 +62,105 @@
 - 接入数据集时，读取 HuggingFace datasets 和训练文档。
 - 做角色微调、同步/异步 SFT 或 SwanLab 训练记录时，先参考 `examples/chat-huanhuan.py` 与 `examples/chat-huanhuan-async.py`，再读取 Chat-甄嬛说明。
 - 训练后要用 OpenAI SDK 部署时，先保存权重，再读取 OpenAI 兼容 API。
-- 如果某个页面 404 或看起来过期，打开可视化文档页面，再根据当前导航推导 Markdown 路径。
+- 核对 SDK 版本变更、新特性或 API 调整时，读更新日志（`https://docs.pytrio.com/changelog`）。
+- 如果某个页面 404 或看起来过期，先查 `https://docs.pytrio.com/llms.txt` 的页面清单，再按上面的 URL 规则推导 Markdown 路径。
 
 ## URL 规则
 
-大多数文档页面都可以把可视化文档 URL 转成 Markdown 读取：
+官方文档域名统一为 `docs.pytrio.com`（`docs.pytrio.cn` 已 301 重定向到 `.com`）。站点根路径和 `/docs` 都会跳转到「什么是 PyTRIO」。
+
+可视化页面 URL：
 
 ```text
-https://docs.pytrio.cn/docs/<route>
-https://docs.pytrio.cn/docs/content/<route>/content.md
+https://docs.pytrio.com/guide/<route>      # 指南，含 get-started / advanced / resources 子目录
+https://docs.pytrio.com/api/<Name>         # API
+https://docs.pytrio.com/examples/<name>    # 案例
+https://docs.pytrio.com/changelog          # 更新日志（仅可视化页面，无 Markdown）
 ```
 
-根页面是：
+大多数页面可以把可视化 URL 转成 Markdown 读取：`https://docs.pytrio.com/docs/content/<md-route>/content.md`。`<md-route>` 不是页面 URL 的简单镜像，按下面对照表取：
 
-```text
-https://docs.pytrio.cn/docs/content/content.md
-```
+| 可视化页面 | Markdown 路径（省略域名和 `/docs/content/` 前缀） |
+|---|---|
+| `/guide/get-started/what-is-pytrio` | `get-started/what-is-pytrio/content.md` |
+| `/guide/train` | `guide/train/content.md` |
+| `/guide/advanced/openai` | `advanced/openai/content.md` |
+| `/guide/resources/prefill-cache` | `resources/prefill-cache/content.md` |
+| `/api/ServiceClient` | `api/ServiceClient/content.md` |
+| `/examples/grpo` | `example/grpo/content.md` |
 
-示例：
+即：`get-started/`、`advanced/`、`resources/` 子目录在 Markdown 里去掉 `guide/` 前缀；普通指南页保留 `guide/`；案例页 `examples/` 在 Markdown 里是单数 `example/`。
 
-```text
-https://docs.pytrio.cn/docs/guide/train
-https://docs.pytrio.cn/docs/content/guide/train/content.md
-```
+需要全站目录或页面 404 时，读 `https://docs.pytrio.com/llms.txt`（带描述的页面清单）或 `https://docs.pytrio.com/sitemap.xml`。
 
 ## 核心页面
 
+### 开始使用
+
 | 主题 | Markdown 链接 |
 |---|---|
-| 什么是 PyTRIO | https://docs.pytrio.cn/docs/content/content.md |
-| 快速开始 | https://docs.pytrio.cn/docs/content/quick-start/content.md |
-| 训练 | https://docs.pytrio.cn/docs/content/guide/train/content.md |
-| 推理/采样 | https://docs.pytrio.cn/docs/content/guide/sample/content.md |
+| 什么是 PyTRIO | https://docs.pytrio.com/docs/content/get-started/what-is-pytrio/content.md |
+| 快速开始 | https://docs.pytrio.com/docs/content/get-started/quick-start/content.md |
+
+### 指南
+
+| 主题 | Markdown 链接 |
+|---|---|
+| 训练 | https://docs.pytrio.com/docs/content/guide/train/content.md |
+| 推理/采样 | https://docs.pytrio.com/docs/content/guide/sample/content.md |
 | 多模态 | https://docs.pytrio.com/docs/content/guide/vision/content.md |
-| 计算 logprobs | https://docs.pytrio.cn/docs/content/advanced/compute_logprobs/content.md |
-| 保存权重与继续训练 | https://docs.pytrio.cn/docs/content/guide/resume/content.md |
-| 下载权重 | https://docs.pytrio.cn/docs/content/guide/download/content.md |
-| 损失函数 | https://docs.pytrio.cn/docs/content/guide/loss_fn/content.md |
+| 保存权重 | https://docs.pytrio.com/docs/content/guide/save/content.md |
+| 继续训练 | https://docs.pytrio.com/docs/content/guide/resume/content.md |
+| 下载权重 | https://docs.pytrio.com/docs/content/guide/download/content.md |
+| 损失函数 | https://docs.pytrio.com/docs/content/guide/loss_fn/content.md |
 | 自定义损失函数 | https://docs.pytrio.com/docs/content/guide/custom_loss/content.md |
-| 异步 | https://docs.pytrio.cn/docs/content/guide/async/content.md |
-| HuggingFace datasets | https://docs.pytrio.cn/docs/content/advanced/datasets/content.md |
-| OpenAI 兼容 API | https://docs.pytrio.cn/docs/content/advanced/openai/content.md |
-| 模型列表 | https://docs.pytrio.cn/docs/content/models/content.md |
-| 合作与交流 | https://docs.pytrio.cn/docs/content/communication/content.md |
+| 异步 | https://docs.pytrio.com/docs/content/guide/async/content.md |
+
+### 进阶
+
+| 主题 | Markdown 链接 |
+|---|---|
+| 环境变量配置 | https://docs.pytrio.com/docs/content/advanced/configuration/content.md |
+| OpenAI 兼容 API | https://docs.pytrio.com/docs/content/advanced/openai/content.md |
+| HuggingFace datasets | https://docs.pytrio.com/docs/content/advanced/datasets/content.md |
+| 计算 logprobs | https://docs.pytrio.com/docs/content/advanced/compute_logprobs/content.md |
+
+### 更多资源
+
+| 主题 | 链接 |
+|---|---|
+| Prefill、Cache、Sample 与 Train | https://docs.pytrio.com/docs/content/resources/prefill-cache/content.md |
+| 时钟周期 | https://docs.pytrio.com/docs/content/resources/clock-cycle/content.md |
+| 模型列表 | https://pytrio.cn/home/pricing （外链，无 Markdown） |
+| 合作与交流 | https://docs.pytrio.com/docs/content/resources/communication/content.md |
+| 更新日志 | https://docs.pytrio.com/changelog （仅可视化页面，无 Markdown） |
 
 ## API 页面
 
 | API | Markdown 链接 |
 |---|---|
-| `trio.ServiceClient` | https://docs.pytrio.cn/docs/content/api/ServiceClient/content.md |
-| `trio.TrainingClient` | https://docs.pytrio.cn/docs/content/api/TrainingClient/content.md |
-| `trio.SamplingClient` | https://docs.pytrio.cn/docs/content/api/SamplingClient/content.md |
-| `trio.RestClient` | https://docs.pytrio.cn/docs/content/api/RestClient/content.md |
-| `trio.Datum` | https://docs.pytrio.cn/docs/content/api/Datum/content.md |
-| `trio.ModelInput` | https://docs.pytrio.cn/docs/content/api/ModelInput/content.md |
-| `trio.AdamParams` | https://docs.pytrio.cn/docs/content/api/AdamParams/content.md |
-| `trio.SamplingParams` | https://docs.pytrio.cn/docs/content/api/SamplingParams/content.md |
+| `trio.ServiceClient` | https://docs.pytrio.com/docs/content/api/ServiceClient/content.md |
+| `trio.TrainingClient` | https://docs.pytrio.com/docs/content/api/TrainingClient/content.md |
+| `trio.SamplingClient` | https://docs.pytrio.com/docs/content/api/SamplingClient/content.md |
+| `trio.RestClient` | https://docs.pytrio.com/docs/content/api/RestClient/content.md |
+| `trio.Datum` | https://docs.pytrio.com/docs/content/api/Datum/content.md |
+| `trio.ModelInput` | https://docs.pytrio.com/docs/content/api/ModelInput/content.md |
+| `trio.AdamParams` | https://docs.pytrio.com/docs/content/api/AdamParams/content.md |
+| `trio.SamplingParams` | https://docs.pytrio.com/docs/content/api/SamplingParams/content.md |
 
 ## 案例
 
 | 案例 | Markdown 链接 |
 |---|---|
-| Chat-甄嬛 | https://docs.pytrio.cn/docs/content/example/chat_huanhuan/content.md |
-| GSM8K | https://docs.pytrio.cn/docs/content/example/gsm8k/content.md |
-| GRPO | https://docs.pytrio.cn/docs/content/example/grpo/content.md |
+| Chat-甄嬛 | https://docs.pytrio.com/docs/content/example/chat_huanhuan/content.md |
+| Decision Model / PyTRIO-Jev | https://docs.pytrio.com/docs/content/example/decision-model-jev/content.md |
+| GSM8K | https://docs.pytrio.com/docs/content/example/gsm8k/content.md |
+| GRPO | https://docs.pytrio.com/docs/content/example/grpo/content.md |
 | Vision GRPO | https://docs.pytrio.com/docs/content/example/vision-grpo/content.md |
-| On-Policy Distillation | https://docs.pytrio.cn/docs/content/example/opd/content.md |
-| Search-R1 | https://docs.pytrio.cn/docs/content/example/search-r1/content.md |
-| On-Policy Self-Distillation | https://docs.pytrio.cn/docs/content/example/opsd/content.md |
-| DPO | https://docs.pytrio.cn/docs/content/example/dpo/content.md |
+| On-Policy Distillation | https://docs.pytrio.com/docs/content/example/opd/content.md |
+| Search-R1 | https://docs.pytrio.com/docs/content/example/search-r1/content.md |
+| On-Policy Self-Distillation | https://docs.pytrio.com/docs/content/example/opsd/content.md |
+| DPO | https://docs.pytrio.com/docs/content/example/dpo/content.md |
 
 ## 多文件完整案例
 

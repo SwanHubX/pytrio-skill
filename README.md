@@ -14,7 +14,7 @@
 > 让 Agent 正确使用 PyTRIO 写 SFT、Decision Model 决策模型、多模态推理与训练、Vision GRPO、GRPO、OPD、Search-R1、ReTool、OPSD、DAPO、GSPO、ALFWorld、自定义损失函数、DPO、推理和实验记录代码。
 
 [![PyTRIO 官网](https://img.shields.io/badge/PyTRIO-官网-fc4547)](https://pytrio.cn/)
-[![PyTRIO Docs](https://img.shields.io/badge/PyTRIO-官方文档-ff6b57)](https://docs.pytrio.cn/docs)
+[![PyTRIO Docs](https://img.shields.io/badge/PyTRIO-官方文档-ff6b57)](https://docs.pytrio.com)
 [![ModelScope Skill](https://img.shields.io/badge/ModelScope-Skill-624aff)](https://www.modelscope.cn/skills/SwanLab/pytrio-skill/summary)
 [![Agent Skill](https://img.shields.io/badge/Agent-Skill-7c3aed)](skills/pytrio-skill/SKILL.md)
 [![Skill Version](https://img.shields.io/badge/Skill-v0.2.3-7c3aed)](skills/pytrio-skill/SKILL.md)
@@ -255,7 +255,7 @@ skills/
 
 ### Custom Loss
 
-`references/custom-loss.md` 对齐[官网自定义损失函数文档](https://docs.pytrio.com/docs/guide/custom_loss)：
+`references/custom-loss.md` 对齐[官网自定义损失函数文档](https://docs.pytrio.com/guide/custom_loss)：
 
 1. `loss_fn(data, logprobs)` 在本地 PyTorch 进程执行并返回 `(loss, metrics)`
 2. `Datum.loss_fn_inputs` 只提供与 `model_input` 等长的 `target_tokens`

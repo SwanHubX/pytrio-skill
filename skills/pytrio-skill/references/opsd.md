@@ -19,8 +19,8 @@
 
 OPSD 是包含数据准备、同步/异步训练、评测和分析的多文件案例：
 
-- 官方案例：https://docs.pytrio.com/docs/example/opsd
-- 官方 Markdown：https://docs.pytrio.cn/docs/content/example/opsd/content.md
+- 官方案例：https://docs.pytrio.com/examples/opsd
+- 官方 Markdown：https://docs.pytrio.com/docs/content/example/opsd/content.md
 - 完整代码：https://github.com/datawhalechina/agentic-rl-lab/tree/main/experiments/opsd
 - 本 Skill 核对版本：https://github.com/datawhalechina/agentic-rl-lab/tree/906d54e/04-opsd
 
